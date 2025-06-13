@@ -13,12 +13,12 @@
          return prefix(1).capitalized + dropFirst()
      }
  }
+ 
  Color.swift (Extensions)
  extension Color {
      static let primary = Color("PrimaryColor")
      static let secondary = Color("SecondaryColor")
  }
-
 
  */
 
