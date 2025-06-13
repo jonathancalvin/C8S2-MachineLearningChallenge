@@ -55,6 +55,7 @@
 				AB57097E2DFBFEE800961DEF /* Sources */,
 				AB57097F2DFBFEE800961DEF /* Frameworks */,
 				AB5709802DFBFEE800961DEF /* Resources */,
+				645F63742DFC191100F535C5 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -94,6 +95,9 @@
 			);
 			mainGroup = AB5709792DFBFEE800961DEF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				645F63732DFC18F000F535C5 /* XCRemoteSwiftPackageReference "SwiftLint" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AB5709832DFBFEE800961DEF /* Products */;
 			projectDirPath = "";
@@ -113,6 +117,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		645F63742DFC191100F535C5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint t installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AB57097E2DFBFEE800961DEF /* Sources */ = {
@@ -254,6 +280,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FenScan/Preview Content\"";
 				DEVELOPMENT_TEAM = KPG55543AH;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -283,6 +310,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"FenScan/Preview Content\"";
 				DEVELOPMENT_TEAM = KPG55543AH;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -324,6 +352,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		645F63732DFC18F000F535C5 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.59.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = AB57097A2DFBFEE800961DEF /* Project object */;
 }
