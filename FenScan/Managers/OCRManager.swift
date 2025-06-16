@@ -17,7 +17,6 @@ final class OCRManager : OCRManagerProtocol {
         // Create a new image-request handler.
         let requestHandler = VNImageRequestHandler(cgImage: cgImage)
 
-
         // Create a new request to recognize text.
         let request = makeTextRecognitionRequest { recognizedStrings in
             let resultText = self.processResults(recognizedStrings)
