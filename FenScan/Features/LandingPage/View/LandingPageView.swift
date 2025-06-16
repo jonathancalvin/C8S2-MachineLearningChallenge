@@ -11,46 +11,77 @@ import SwiftUI
 struct LandingPageView: View {
     var body: some View {
         NavigationStack {
-            VStack {
-                Spacer()
-                
-                Image(systemName: "qrcode.viewfinder")
-                    .resizable()
-                    .frame(width: 200, height: 200)
-                    .padding()
-                    .foregroundColor(.white)
-                
-                Text("Welcome to FenScan")
-                    .font(.headline)
-                    .padding(.vertical, 10)
-                    .foregroundColor(.white)
-                
-                Text("Haram Ingredients Detection App for Travellers")
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                
-                Spacer()
-                
-                NavigationLink(destination: ContentView()) {
-                    Text("Get Started")
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
-                        .padding()
-                        .background(Color(red: 1, green: 1, blue: 1))
-                        .cornerRadius(10)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
+            ZStack {
+                // Background gradient
                 LinearGradient(
                     stops: [
-                        Gradient.Stop(color: Color(red: 0.81, green: 0.19, blue: 0.31), location: 0.30),
-                        Gradient.Stop(color: Color(red: 0.29, green: 0.56, blue: 0.93), location: 0.80),
+                        Gradient.Stop(color: Color(red: 1, green: 0.14, blue: 0.15), location: 0.38),
+                        Gradient.Stop(color: Color(red: 0.6, green: 0.08, blue: 0.09), location: 1.00)
                     ],
                     startPoint: UnitPoint(x: 0.5, y: -0.1),
                     endPoint: UnitPoint(x: 0.5, y: 1)
                 )
-            )
+                .ignoresSafeArea()
+
+                // Union1 - pojok kiri atas (overflow keluar)
+                Image("Union1")
+                    .resizable()
+                    .frame(width: 300, height: 300)
+                    .position(x: 100, y: 100)
+
+                // Union2 - pojok kanan bawah (overflow keluar)
+                GeometryReader { geo in
+                    Image("Union2")
+                        .resizable()
+                        .frame(width: 380, height: 380)
+                        .position(x: geo.size.width , y: geo.size.height )
+                }
+
+                VStack {
+                    Spacer()
+
+                    // Logo center
+                    ZStack {
+                        Image("addLogo")
+                            .resizable()
+                            .frame(width: 210, height: 210)
+                            .padding()
+
+                        Image("logo1")
+                            .resizable()
+                            .frame(width: 175, height: 175)
+                            .padding()
+                    }
+
+                    Spacer()
+                    
+                    Text("Welcome to FenScan")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.top, 10)
+                        .foregroundColor(.white)
+                        .padding(.bottom, 10)
+
+                    Text("Haram Ingredients Detection App ")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.bottom, 30)
+                    
+
+                    NavigationLink(destination: OCRView()) {
+                        Text("Get Started")
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                            .padding()
+                            .frame(width: 180)
+                            .background(Color.white)
+                            .cornerRadius(50)
+                    }
+
+                    Spacer()
+                }
+                .padding()
+            }
         }
     }
 }

@@ -67,35 +67,46 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
 
+        // 1. Ambil citra kamera dengan orientasi yang sesuai
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            .oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
 
-        // Hitung cropRect berdasarkan posisi boundary box di layar vs citra kamera
-        let scaleX = ciImage.extent.width / imageSize.width
-        let scaleY = ciImage.extent.height / imageSize.height
+        let cameraImageSize = ciImage.extent.size
+        let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
 
-        let cropRect = CGRect(
-            x: frame.minX * scaleX,
-            y: (imageSize.height - frame.maxY) * scaleY, // karena koordinat Y terbalik
+        // 2. Hitung skala dari UI ke kamera
+        let scaleX = cameraImageSize.width / previewSize.width
+        let scaleY = cameraImageSize.height / previewSize.height
+
+        // 3. Flip Y axis dari koordinat UI ke citra kamera (CIImage origin ada di kiri bawah)
+        let flippedY = previewSize.height - frame.origin.y - frame.height
+
+        let mappedBox = CGRect(
+            x: frame.origin.x * scaleX,
+            y: flippedY * scaleY,
             width: frame.width * scaleX,
             height: frame.height * scaleY
         )
 
-        let cropped = ciImage.cropped(to: cropRect)
+        // 4. Crop hanya pada boundary box
+        let cropped = ciImage.cropped(to: mappedBox)
 
+        // 5. OCR hanya di area dalam bounding box
         let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
         let request = VNRecognizeTextRequest { [weak self] request, _ in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
-            let text = observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
+
+            let recognized = results.compactMap { $0.topCandidates(1).first?.string }
             DispatchQueue.main.async {
-                self?.recognizedText = text
+                self?.recognizedText = recognized.joined(separator: "\n")
             }
         }
 
-        // Aktifkan dukungan bahasa Cina Tradisional (atau Sederhana)
-        request.recognitionLanguages = ["zh-Hant", "zh-Hans", "en-US"]
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
+        request.recognitionLanguages = ["en-US", "zh-Hant", "zh-Hans"]
 
         try? handler.perform([request])
     }
 }
+
