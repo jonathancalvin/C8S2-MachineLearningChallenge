@@ -21,11 +21,4 @@ class ProductDetailViewModel: ObservableObject {
         self.productImageData = productImageData
         self.translationConfiguration = translationConfiguration
     }
-    
-    func invalidateTranslationConfiguration() {
-        if translationConfiguration == nil { return }
-        translationConfiguration?.invalidate()
-        print("invalidated")
-    }
-    
 }

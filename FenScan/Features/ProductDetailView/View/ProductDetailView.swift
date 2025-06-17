@@ -77,9 +77,6 @@ struct ProductDetailView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .onAppear {
-            viewModel.invalidateTranslationConfiguration()
-        }
     }
     // Extracted Component Functions
     func productStatusDisplay(productStatus: String) -> some View {
