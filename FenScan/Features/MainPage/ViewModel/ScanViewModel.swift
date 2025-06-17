@@ -14,6 +14,7 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
     @Published var recognizedText: String = ""
     var session = AVCaptureSession()
     private var latestBuffer: CMSampleBuffer?
+    @Published var latestImageData: Data?
 
     func startCamera() {
         checkPermissionAndConfigure()
@@ -66,6 +67,18 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         latestBuffer = sampleBuffer
     }
 
+    func captureImage() {
+        guard let buffer = latestBuffer, let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
+        let uiImage = UIImage(cgImage: cgImage)
+        if let imageData = uiImage.jpegData(compressionQuality: 1) {
+            self.latestImageData = imageData
+            print("captured: \(imageData.count)")
+        }
+    }
+
     func performTextRecognition(in frame: CGRect, imageSize: CGSize) {
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
@@ -100,7 +113,7 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
             if text.isEmpty {
                 print("OCR failed")
             } else {
-                print("recognized: \(text)")
+//                print("recognized: \(text)")
             }
             DispatchQueue.main.async {
                 self?.recognizedText = text

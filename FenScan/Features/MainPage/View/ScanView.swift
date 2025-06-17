@@ -16,10 +16,11 @@ import Translation
 struct ScanView: View {
     @State private var isShowingResult = false
     @StateObject private var viewModel = ScanViewModel()
+    @State private var productDetailViewModel: ProductDetailViewModel?
 
     let boxWidth: CGFloat = 318
     let boxHeight: CGFloat = 485
-    
+
     @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
     @State var translationConfiguration: TranslationSession.Configuration?
     @State var translatedText: String = ""
@@ -67,6 +68,7 @@ struct ScanView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             print(":\(viewModel.recognizedText)")
                             if !viewModel.recognizedText.isEmpty {
+                                viewModel.captureImage()
                                 translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
                                 if translationConfiguration == nil {
                                     translationConfiguration = TranslationSession.Configuration(
@@ -74,7 +76,11 @@ struct ScanView: View {
                                         target: Locale.Language(identifier: "en")
                                     )
                                 }
-                                isShowingResult = true
+                                productDetailViewModel = ProductDetailViewModel(
+                                    productImageData: viewModel.latestImageData ?? Data(),
+                                    translationConfiguration: translationConfiguration
+                                )
+//                                isShowingResult = true
                             }
                         }
                     }) {
@@ -94,10 +100,20 @@ struct ScanView: View {
                             for try await response in session.translate(batch: [translationRequest]) {
                                 print("Translation: \(response.targetText)")
                                 translatedText = response.targetText
+//                                DispatchQueue.main.async {
+//                                    isShowingResult = true
+//                                }
+                                isShowingResult = true
                             }
                         } catch {
                             print(error.localizedDescription)
                         }
+                    }
+                    NavigationLink(
+                        destination: ProductDetailView(viewModel: ProductDetailViewModel(productImageData: viewModel.latestImageData ?? Data(), translationConfiguration: translationConfiguration)),
+                        isActive: $isShowingResult
+                    ) {
+                        EmptyView()
                     }
                 }
             }
@@ -117,6 +133,9 @@ struct ScanView: View {
 
                     Button(action: {
                         isShowingResult = false
+//                        if translationConfiguration != nil {
+//                            translationConfiguration?.invalidate()
+//                        }
                     }) {
                         Text("Tutup")
                             .foregroundColor(.white)

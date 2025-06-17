@@ -7,8 +7,13 @@
 
 import Foundation
 import SwiftUI
+import Translation
 
 struct ProductDetailView: View {
+    
+//    @Binding var productImageData: Data?
+//    @Binding var translationConfiguration: TranslationSession.Configuration?
+    @ObservedObject var viewModel: ProductDetailViewModel
     var productStatus: String = "Halal"
     var productDescription: String?
 //    var ingredients: [String] = []
@@ -16,21 +21,20 @@ struct ProductDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
-//            if let selectedImage = selectedImage {
-//                Image(uiImage: selectedImage)
-//                    .resizable()
-//                    .frame(width: 300, height: 300)
-//                    .padding()
-//            } else {
-//                // default
-//            }
-                Image(systemName: "photo.fill")
-                    .resizable()
-                    .scaledToFill()
-                    .aspectRatio(contentMode: .fit)
-                    .clipped()
-                    .frame(maxWidth: geometry.size.width, alignment: .top)
-                    .foregroundColor(.gray)
+                if let selectedImage = UIImage(data: viewModel.productImageData) {
+                    Image(uiImage: selectedImage)
+                        .resizable()
+                        .frame(width: 300, height: 300)
+                        .padding()
+                } else {
+                    Image(systemName: "photo.fill")
+                        .resizable()
+                        .scaledToFill()
+                        .aspectRatio(contentMode: .fit)
+                        .clipped()
+                        .frame(maxWidth: geometry.size.width, alignment: .top)
+                        .foregroundColor(.gray)
+                }
             }
             VStack {
                 Spacer()
@@ -152,8 +156,4 @@ struct ProductDetailView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
     }
-}
-
-#Preview {
-    ProductDetailView()
 }
