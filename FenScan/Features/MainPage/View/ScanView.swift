@@ -17,6 +17,7 @@ struct ScanView: View {
     @State private var isShowingResult = false
     @StateObject private var viewModel = ScanViewModel()
     @State private var productDetailViewModel: ProductDetailViewModel?
+    @State var preventTranslationLoop: Bool = false
 
     let boxWidth: CGFloat = 318
     let boxHeight: CGFloat = 485
@@ -64,7 +65,7 @@ struct ScanView: View {
                         )
                         let frame = CGRect(origin: origin, size: CGSize(width: boxWidth, height: boxHeight))
                         viewModel.performTextRecognition(in: frame, imageSize: geo.size)
-
+                        preventTranslationLoop = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             print(":\(viewModel.recognizedText)")
                             if !viewModel.recognizedText.isEmpty {
@@ -81,6 +82,7 @@ struct ScanView: View {
                                     translationConfiguration: translationConfiguration
                                 )
 //                                isShowingResult = true
+                                translationConfiguration?.invalidate()
                             }
                         }
                     }) {
@@ -96,23 +98,27 @@ struct ScanView: View {
                     }
                     .padding(.bottom, 30)
                     .translationTask(translationConfiguration) { session in
-                        do {
-                            for try await response in session.translate(batch: [translationRequest]) {
-                                print("Translation: \(response.targetText)")
-                                translatedText = response.targetText
-//                                DispatchQueue.main.async {
-//                                    isShowingResult = true
-//                                }
-                                isShowingResult = true
+                        guard !preventTranslationLoop else { return }
+                        Task { @MainActor in
+                            do {
+                                for try await response in session.translate(batch: [translationRequest]) {
+                                    print("Translation: \(response.targetText)")
+                                    translatedText = response.targetText
+    //                                DispatchQueue.main.async {
+    //                                    isShowingResult = true
+    //                                }
+                                    isShowingResult = true
+                                }
+                            } catch {
+                                print(error.localizedDescription)
                             }
-                        } catch {
-                            print(error.localizedDescription)
                         }
                     }
                     NavigationLink(
                         destination: ProductDetailView(viewModel: ProductDetailViewModel(productImageData: viewModel.latestImageData ?? Data(), translationConfiguration: translationConfiguration)),
                         isActive: $isShowingResult
                     ) {
+                        
                         EmptyView()
                     }
                 }

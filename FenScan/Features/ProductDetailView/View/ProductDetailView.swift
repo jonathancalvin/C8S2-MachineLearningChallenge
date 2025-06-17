@@ -56,6 +56,7 @@ struct ProductDetailView: View {
                             .padding(.top)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 10)
+
                         if ingredients.isEmpty {
                             Spacer()
                             noIngredientsFound()
@@ -76,6 +77,9 @@ struct ProductDetailView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .onAppear {
+            viewModel.invalidateTranslationConfiguration()
+        }
     }
     // Extracted Component Functions
     func productStatusDisplay(productStatus: String) -> some View {
