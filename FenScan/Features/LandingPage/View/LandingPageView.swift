@@ -34,7 +34,7 @@ struct LandingPageView: View {
                     Image("Union2")
                         .resizable()
                         .frame(width: 380, height: 380)
-                        .position(x: geo.size.width , y: geo.size.height )
+                        .position(x: geo.size.width, y: geo.size.height )
                 }
 
                 VStack {
@@ -68,7 +68,7 @@ struct LandingPageView: View {
                         .padding(.bottom, 30)
                     
 
-                    NavigationLink(destination: OCRView()) {
+                    NavigationLink(destination: ScanView()) {
                         Text("Get Started")
                             .fontWeight(.bold)
                             .foregroundColor(.black)

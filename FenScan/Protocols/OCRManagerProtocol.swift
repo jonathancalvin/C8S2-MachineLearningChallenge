@@ -9,5 +9,5 @@ import Foundation
 import UIKit
 
 protocol OCRManagerProtocol {
-    func imageToTextHandler(image: UIImage?, completion: @escaping (String) -> Void)
+    func imageToTextHandler(image: CIImage?, completion: @escaping (String) -> Void)
 }

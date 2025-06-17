@@ -9,11 +9,16 @@ import SwiftUI
 import AVFoundation
 import Vision
 import Combine
+import Translation
 
-class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
+    // TRANSLATED TEXT
+    @Published var translatedText: String = ""
     var session = AVCaptureSession()
     private var latestBuffer: CMSampleBuffer?
+    var latestImageData: Data?
+    @State var translationConfiguration: TranslationSession.Configuration?
 
     func startCamera() {
         checkPermissionAndConfigure()
@@ -56,11 +61,32 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
         }
 
         session.commitConfiguration()
-        session.startRunning()
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.session.startRunning()
+        }
+//        session.startRunning()
     }
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         latestBuffer = sampleBuffer
+    }
+
+    func captureImage() {
+        guard let buffer = latestBuffer, let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+//        if let imageData = ciImage.data {
+//            self.latestImageData = imageData
+//            print("captured: \(imageData.count)")
+//        }
+
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
+        let uiImage = UIImage(cgImage: cgImage)
+        if let imageData = uiImage.jpegData(compressionQuality: 1) {
+            self.latestImageData = imageData
+            print("captured: \(imageData.count)")
+        }
     }
 
     func performTextRecognition(in frame: CGRect, imageSize: CGSize) {
@@ -69,7 +95,7 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
 
         // 1. Ambil citra kamera dengan orientasi yang sesuai
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            .oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
+            .oriented(.up) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
 
         let cameraImageSize = ciImage.extent.size
         let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
@@ -92,21 +118,11 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
         let cropped = ciImage.cropped(to: mappedBox)
 
         // 5. OCR hanya di area dalam bounding box
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        let request = VNRecognizeTextRequest { [weak self] request, _ in
-            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
-
-            let recognized = results.compactMap { $0.topCandidates(1).first?.string }
+        let OCR = OCRManager()
+        OCR.imageToTextHandler(image: cropped) { [weak self] text in
             DispatchQueue.main.async {
-                self?.recognizedText = recognized.joined(separator: "\n")
+                self?.recognizedText = text
             }
         }
-
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        request.recognitionLanguages = ["en-US", "zh-Hant", "zh-Hans"]
-
-        try? handler.perform([request])
     }
 }
-

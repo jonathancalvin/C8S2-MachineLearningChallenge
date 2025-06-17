@@ -10,7 +10,7 @@
 import SwiftUI
 import AVFoundation
 struct CameraView: UIViewRepresentable {
-    @ObservedObject var viewModel: OCRViewModel
+    @ObservedObject var viewModel: ScanViewModel
 
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: UIScreen.main.bounds)

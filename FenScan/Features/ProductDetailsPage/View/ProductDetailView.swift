@@ -7,30 +7,36 @@
 
 import Foundation
 import SwiftUI
+import Translation
 
 struct ProductDetailView: View {
     var productStatus: String = "Halal"
     var productDescription: String?
-//    var ingredients: [String] = []
-    var ingredients: [String] = ["Babi", "Carminic Acid", "Keku", "Mie", "Salycilic Acid", "Sapi", "Sate", "Sausage", "Soto", "Susu"]
+    var ingredients: [String] = []
+    var viewModel = ScanViewModel()
+//    var ingredients: [String] = ["Babi", "Carminic Acid", "Keku", "Mie", "Salycilic Acid", "Sapi", "Sate", "Sausage", "Soto", "Susu"]
+//    @State var productImageData: Data
+
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
-//            if let selectedImage = selectedImage {
-//                Image(uiImage: selectedImage)
-//                    .resizable()
-//                    .frame(width: 300, height: 300)
-//                    .padding()
-//            } else {
-//                // default
-//            }
-                Image(systemName: "photo.fill")
-                    .resizable()
-                    .scaledToFill()
-                    .aspectRatio(contentMode: .fit)
-                    .clipped()
-                    .frame(maxWidth: geometry.size.width, alignment: .top)
-                    .foregroundColor(.gray)
+                let productImageData = viewModel.latestImageData ?? Data()
+                if let uiImage = UIImage(data: productImageData) {
+//                    let rotatedImage = uiImage.rotate(radians: .pi / 2)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: geometry.size.width)
+                        .clipped()
+                } else {
+                    Image(systemName: "photo.fill")
+                        .resizable()
+                        .scaledToFill()
+                        .aspectRatio(contentMode: .fit)
+                        .clipped()
+                        .frame(maxWidth: geometry.size.width, alignment: .top)
+                        .foregroundColor(.gray)
+                }
             }
             VStack {
                 Spacer()
@@ -40,6 +46,7 @@ struct ProductDetailView: View {
                         Text(productStatus == "Haram" ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
                             .font(.headline)
                             .fontWeight(.medium)
+                            .foregroundStyle(.black)
                             .padding(.top)
                             .padding(.horizontal, 12)
                             .multilineTextAlignment(.center)
@@ -52,6 +59,7 @@ struct ProductDetailView: View {
                             .padding(.top)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 10)
+                            .foregroundStyle(.black)
                         if ingredients.isEmpty {
                             Spacer()
                             noIngredientsFound()
@@ -76,6 +84,7 @@ struct ProductDetailView: View {
     // Extracted Component Functions
     func productStatusDisplay(productStatus: String) -> some View {
         let gradientColors = productStatus == "Haram" ? [Color.red.opacity(0.8), Color.red.opacity(0.6)] : [Color.blue.opacity(0.8), Color.blue.opacity(0.6)]
+        viewModel.translationConfiguration?.invalidate()
         return Text(productStatus)
             .font(.largeTitle)
             .fontWeight(.bold)
@@ -99,7 +108,7 @@ struct ProductDetailView: View {
             Text("No Haram ingredients found.")
                 .font(.headline)
                 .fontWeight(.medium)
-                .opacity(0.4)
+                .foregroundStyle(.gray.opacity(0.4))
         }
         .frame(maxWidth: .infinity)
     }
@@ -118,6 +127,7 @@ struct ProductDetailView: View {
                     Text(ingredient)
                         .font(.headline)
                         .fontWeight(.medium)
+                        .foregroundColor(.black)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -143,6 +153,7 @@ struct ProductDetailView: View {
                 .font(.caption2)
                 .italic(true)
                 .opacity(0.6)
+                .foregroundStyle(.black.opacity(0.6))
         }
         .padding(10)
         .padding(.horizontal, 6)
@@ -152,8 +163,4 @@ struct ProductDetailView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
     }
-}
-
-#Preview {
-    ProductDetailView()
 }

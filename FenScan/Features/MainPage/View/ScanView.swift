@@ -1,5 +1,5 @@
 //
-//  OCRView.swift
+//  ScanView.swift
 //  FenScan
 //
 //  Created by Ahmad Al Wabil on 13/06/25.
@@ -11,15 +11,14 @@ import AVFoundation
 import Vision
 import VisionKit
 import Combine
+import Translation
 
-
-struct OCRView: View {
+struct ScanView: View {
     @State private var isShowingResult = false
-    @StateObject private var viewModel = OCRViewModel()
-    
+    @StateObject private var viewModel = ScanViewModel()
     let boxWidth: CGFloat = 318
     let boxHeight: CGFloat = 485
-    
+    @State private var translationRequest: TranslationSession.Request = .init(sourceText: "")
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -43,13 +42,10 @@ struct OCRView: View {
                     }
                     .compositingGroup()
                     .ignoresSafeArea()
-                
-
                 Image("boundaryBox")
                     .resizable()
                     .frame(width: 322, height: 490)
                     .padding(.bottom, 20)
-                
                 // Tombol Scan di bagian bawah
                 VStack {
                     Spacer()
@@ -60,10 +56,18 @@ struct OCRView: View {
                         )
                         let frame = CGRect(origin: origin, size: CGSize(width: boxWidth, height: boxHeight))
                         viewModel.performTextRecognition(in: frame, imageSize: geo.size)
-                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             if !viewModel.recognizedText.isEmpty {
-                                isShowingResult = true
+//                                viewModel.captureImage()
+                                // TRANSLATION REQUEST MANAGEMENT
+                                translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText, clientIdentifier: "000")
+                                if viewModel.translationConfiguration == nil {
+                                    viewModel.translationConfiguration = TranslationSession.Configuration(
+                                        source: Locale.Language(identifier: "zh-Hant"),
+                                        target: Locale.Language(identifier: "en")
+                                    )
+                                    return
+                                }
                             }
                         }
                     }) {
@@ -78,6 +82,24 @@ struct OCRView: View {
                             .shadow(radius: 5)
                     }
                     .padding(.bottom, 30)
+                    // TRANSLATE FUNCTION
+                    .translationTask(viewModel.translationConfiguration) { session in
+                        do {
+                            for try await response in session.translate(batch: [translationRequest]) {
+                                print(response.targetText, response.clientIdentifier ?? "")
+                                viewModel.translatedText = response.targetText
+                                isShowingResult = true
+                            }
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                    NavigationLink(
+                        destination: ProductDetailView(),
+                        isActive: $isShowingResult
+                    ) {
+                        EmptyView()
+                    }
                 }
             }
             .sheet(isPresented: $isShowingResult) {
@@ -86,7 +108,6 @@ struct OCRView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                         .padding(.top)
-                    
                     ScrollView {
                         Text(viewModel.recognizedText)
                             .font(.body)
@@ -105,6 +126,7 @@ struct OCRView: View {
                             .padding(.horizontal)
                     }
                     .padding(.bottom)
+
                 }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
