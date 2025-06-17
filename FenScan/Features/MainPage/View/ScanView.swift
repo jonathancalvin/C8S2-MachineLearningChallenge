@@ -13,9 +13,9 @@ import VisionKit
 import Combine
 import Translation
 
-struct OCRView: View {
+struct ScanView: View {
     @State private var isShowingResult = false
-    @StateObject private var viewModel = OCRViewModel()
+    @StateObject private var viewModel = ScanViewModel()
 
     let boxWidth: CGFloat = 318
     let boxHeight: CGFloat = 485

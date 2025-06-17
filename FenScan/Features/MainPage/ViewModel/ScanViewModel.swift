@@ -10,7 +10,7 @@ import AVFoundation
 import Vision
 import Combine
 
-class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
     var session = AVCaptureSession()
     private var latestBuffer: CMSampleBuffer?
@@ -106,20 +106,5 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
                 self?.recognizedText = text
             }
         }
-//        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-//        let request = VNRecognizeTextRequest { [weak self] request, _ in
-//            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
-//
-//            let recognized = results.compactMap { $0.topCandidates(1).first?.string }
-//            DispatchQueue.main.async {
-//                self?.recognizedText = recognized.joined(separator: "\n")
-//            }
-//        }
-//
-//        request.recognitionLevel = .accurate
-//        request.usesLanguageCorrection = true
-//        request.recognitionLanguages = ["en-US", "zh-Hant", "zh-Hans"]
-//
-//        try? handler.perform([request])
     }
 }

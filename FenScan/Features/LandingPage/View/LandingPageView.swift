@@ -54,7 +54,7 @@ struct LandingPageView: View {
                     }
 
                     Spacer()
-                    
+
                     Text("Welcome to FenScan")
                         .font(.title)
                         .fontWeight(.bold)
@@ -66,9 +66,8 @@ struct LandingPageView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding(.bottom, 30)
-                    
 
-                    NavigationLink(destination: OCRView()) {
+                    NavigationLink(destination: ScanView()) {
                         Text("Get Started")
                             .fontWeight(.bold)
                             .foregroundColor(.black)
