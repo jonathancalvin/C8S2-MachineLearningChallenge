@@ -1,5 +1,5 @@
 //
-//  OCRViewModel.swift
+//  ScanViewModel.swift
 //  FenScan
 //
 //  Created by Ahmad Al Wabil on 13/06/25.
@@ -12,6 +12,35 @@ import Combine
 
 class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
+    @Published var capturedImage: UIImage? {
+        didSet {
+            print("capturedImage")
+        }
+    }
+    @Published var translatedText: String = "" {
+        didSet {
+            print("Teks hasil terjemahan di-set")
+        }
+    }
+    @Published var isReadyToNavigate: Bool = false
+
+    private var cancellables = Set<AnyCancellable>()
+
+    override init() {
+        super.init()
+        setupNavigationCheck()
+    }
+
+    private func setupNavigationCheck() {
+        Publishers.CombineLatest($capturedImage, $translatedText)
+            .map { image, text in
+                return image != nil && !text.isEmpty
+            }
+            .removeDuplicates()
+            .assign(to: \.isReadyToNavigate, on: self)
+            .store(in: &cancellables)
+    }
+    
     var session = AVCaptureSession()
     private var latestBuffer: CMSampleBuffer?
     @Published var latestImageData: Data?
@@ -85,10 +114,11 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
     func performTextRecognition(in frame: CGRect, imageSize: CGSize) {
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-
+        
         // 1. Ambil citra kamera dengan orientasi yang sesuai
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
 
+        //TO DO: Fix Cropping
         let cameraImageSize = ciImage.extent.size
         let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
 
@@ -108,7 +138,10 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
 
         // 4. Crop hanya pada boundary box
         let cropped = ciImage.cropped(to: mappedBox)
-
+        
+        if let uiImage = cropped.toUIImage() {
+            capturedImage = uiImage
+        }
         // 5. OCR hanya di area dalam bounding box
         let OCR = OCRManager()
         OCR.imageToTextHandler(image: cropped) { [weak self] text in

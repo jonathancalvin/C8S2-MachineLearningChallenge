@@ -157,3 +157,7 @@ struct ProductDetailView: View {
         .padding(.bottom, 20)
     }
 }
+
+//#Preview {
+//    ProductDetailView()
+//}

@@ -1,5 +1,5 @@
 //
-//  OCRView.swift
+//  ScanView.swift
 //  FenScan
 //
 //  Created by Ahmad Al Wabil on 13/06/25.
@@ -70,7 +70,7 @@ struct ScanView: View {
                         viewModel.performTextRecognition(in: frame, imageSize: geo.size)
                         preventTranslationLoop = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            print(":\(viewModel.recognizedText)")
+                            print("rrrrrrrrrrrrr:\(viewModel.recognizedText)")
                             if !viewModel.recognizedText.isEmpty {
                                 viewModel.captureImage()
                                 translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
