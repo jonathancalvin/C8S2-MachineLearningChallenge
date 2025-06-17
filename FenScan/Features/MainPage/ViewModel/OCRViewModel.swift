@@ -56,7 +56,10 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
         }
 
         session.commitConfiguration()
-        session.startRunning()
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.session.startRunning()
+        }
+//        session.startRunning()
     }
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -92,21 +95,31 @@ class OCRViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBu
         let cropped = ciImage.cropped(to: mappedBox)
 
         // 5. OCR hanya di area dalam bounding box
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        let request = VNRecognizeTextRequest { [weak self] request, _ in
-            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
-
-            let recognized = results.compactMap { $0.topCandidates(1).first?.string }
+        let OCR = OCRManager()
+        OCR.imageToTextHandler(image: cropped) { [weak self] text in
+            if text.isEmpty {
+                print("OCR failed")
+            } else {
+                print("recognized: \(text)")
+            }
             DispatchQueue.main.async {
-                self?.recognizedText = recognized.joined(separator: "\n")
+                self?.recognizedText = text
             }
         }
-
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        request.recognitionLanguages = ["en-US", "zh-Hant", "zh-Hans"]
-
-        try? handler.perform([request])
+//        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
+//        let request = VNRecognizeTextRequest { [weak self] request, _ in
+//            guard let results = request.results as? [VNRecognizedTextObservation] else { return }
+//
+//            let recognized = results.compactMap { $0.topCandidates(1).first?.string }
+//            DispatchQueue.main.async {
+//                self?.recognizedText = recognized.joined(separator: "\n")
+//            }
+//        }
+//
+//        request.recognitionLevel = .accurate
+//        request.usesLanguageCorrection = true
+//        request.recognitionLanguages = ["en-US", "zh-Hant", "zh-Hans"]
+//
+//        try? handler.perform([request])
     }
 }
-

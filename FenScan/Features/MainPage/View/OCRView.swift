@@ -11,15 +11,19 @@ import AVFoundation
 import Vision
 import VisionKit
 import Combine
-
+import Translation
 
 struct OCRView: View {
     @State private var isShowingResult = false
     @StateObject private var viewModel = OCRViewModel()
-    
+
     let boxWidth: CGFloat = 318
     let boxHeight: CGFloat = 485
     
+    @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
+    @State var translationConfiguration: TranslationSession.Configuration?
+    @State var translatedText: String = ""
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -43,13 +47,12 @@ struct OCRView: View {
                     }
                     .compositingGroup()
                     .ignoresSafeArea()
-                
 
                 Image("boundaryBox")
                     .resizable()
                     .frame(width: 322, height: 490)
                     .padding(.bottom, 20)
-                
+
                 // Tombol Scan di bagian bawah
                 VStack {
                     Spacer()
@@ -60,9 +63,17 @@ struct OCRView: View {
                         )
                         let frame = CGRect(origin: origin, size: CGSize(width: boxWidth, height: boxHeight))
                         viewModel.performTextRecognition(in: frame, imageSize: geo.size)
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            print(":\(viewModel.recognizedText)")
                             if !viewModel.recognizedText.isEmpty {
+                                translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
+                                if translationConfiguration == nil {
+                                    translationConfiguration = TranslationSession.Configuration(
+                                        source: Locale.Language(identifier: "zh-Hant"),
+                                        target: Locale.Language(identifier: "en")
+                                    )
+                                }
                                 isShowingResult = true
                             }
                         }
@@ -78,6 +89,16 @@ struct OCRView: View {
                             .shadow(radius: 5)
                     }
                     .padding(.bottom, 30)
+                    .translationTask(translationConfiguration) { session in
+                        do {
+                            for try await response in session.translate(batch: [translationRequest]) {
+                                print("Translation: \(response.targetText)")
+                                translatedText = response.targetText
+                            }
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
                 }
             }
             .sheet(isPresented: $isShowingResult) {
@@ -86,9 +107,10 @@ struct OCRView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                         .padding(.top)
-                    
+
                     ScrollView {
-                        Text(viewModel.recognizedText)
+                        Text(translatedText)
+//                        Text(viewModel.recognizedText)
                             .font(.body)
                             .padding()
                     }
