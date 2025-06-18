@@ -118,7 +118,6 @@ struct ScanView: View {
                         destination: ProductDetailView(viewModel: ProductDetailViewModel(productImageData: viewModel.latestImageData ?? Data(), translationConfiguration: translationConfiguration)),
                         isActive: $isShowingResult
                     ) {
-                        
                         EmptyView()
                     }
                 }
@@ -131,17 +130,14 @@ struct ScanView: View {
                         .padding(.top)
 
                     ScrollView {
-                        Text(translatedText)
-//                        Text(viewModel.recognizedText)
-                            .font(.body)
-                            .padding()
+                        Image(uiImage: UIImage(data: viewModel.latestImageData ?? Data())!)
+//                        Text(translatedText)
+//                            .font(.body)
+//                            .padding()
                     }
 
                     Button(action: {
                         isShowingResult = false
-//                        if translationConfiguration != nil {
-//                            translationConfiguration?.invalidate()
-//                        }
                     }) {
                         Text("Tutup")
                             .foregroundColor(.white)
