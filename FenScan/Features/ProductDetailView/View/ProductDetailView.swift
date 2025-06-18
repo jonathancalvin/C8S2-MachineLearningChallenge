@@ -90,6 +90,7 @@ struct ProductDetailView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 550)
+                .background(Color.white)
                 .cornerRadius(20)
             }
         }
@@ -122,7 +123,6 @@ struct ProductDetailView: View {
                 .font(.headline)
                 .fontWeight(.medium)
                 .foregroundStyle(.black.opacity(0.4))
-                .opacity(0.4)
         }
         .frame(maxWidth: .infinity)
     }
@@ -177,7 +177,3 @@ struct ProductDetailView: View {
         .padding(.bottom, 20)
     }
 }
-
-//#Preview {
-//    ProductDetailView()
-//}
