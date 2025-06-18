@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct LandingPageView: View {
+    @EnvironmentObject var alertViewModel: AlertViewModel
     var body: some View {
         NavigationStack {
             ZStack {
@@ -67,7 +68,10 @@ struct LandingPageView: View {
                         .foregroundColor(.white)
                         .padding(.bottom, 30)
 
-                    NavigationLink(destination: ScanView()) {
+                    NavigationLink(
+                        destination: ScanView()
+                                .environmentObject(alertViewModel)
+                    ) {
                         Text("Get Started")
                             .fontWeight(.bold)
                             .foregroundColor(.black)

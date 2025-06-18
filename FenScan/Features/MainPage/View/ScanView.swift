@@ -18,9 +18,8 @@ class ViewModelWrapper: ObservableObject {
 }
 
 struct ScanView: View {
-    @State private var isNavigating = false
+    @EnvironmentObject var alertViewModel: AlertViewModel
     @StateObject private var viewModel = ScanViewModel()
-//    @State private var productDetailViewModel: ProductDetailViewModel?
     @StateObject private var productDetailViewModel: ProductDetailViewModel = ProductDetailViewModel(productImageData: Data())
     @State var preventTranslationLoop: Bool = false
 
@@ -29,8 +28,7 @@ struct ScanView: View {
 
     @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
     @State var translationConfiguration: TranslationSession.Configuration?
-//    @State var translatedText: String = ""
-
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -83,10 +81,10 @@ struct ScanView: View {
                                     )
                                 }
                                 productDetailViewModel.productImageData = viewModel.latestImageData ?? Data()
-//                                isNavigating = true
+                                productDetailViewModel.alertViewModel = self.alertViewModel
                                 translationConfiguration?.invalidate()
                             } else {
-                                // TO DO: Alert OCR Fail
+                                alertViewModel.show(title: "Scan Unsuccessful", message: "We couldn’t detect any ingredient info. Let’s try scanning again.")
                             }
                         }
                     }) {
@@ -108,7 +106,6 @@ struct ScanView: View {
                                 for try await response in session.translate(batch: [translationRequest]) {
                                     print("Translation: \(response.targetText)")
                                     productDetailViewModel.translatedText = response.targetText
-                                    isNavigating = true
                                 }
                             } catch {
                                 print(error.localizedDescription)
@@ -118,7 +115,12 @@ struct ScanView: View {
                 }
             }
         }
-        .navigationDestination(isPresented: $isNavigating) {
+        .alert(alertViewModel.title, isPresented: $alertViewModel.showAlert) {
+            Button("Retake", role: .cancel) { }
+        } message: {
+            Text(alertViewModel.message)
+        }
+        .navigationDestination(isPresented: $productDetailViewModel.isNavigating) {
             ProductDetailView(viewModel: productDetailViewModel)
         }
         .navigationBarBackButtonHidden(true)

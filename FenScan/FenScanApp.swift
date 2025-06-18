@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct FenScanApp: App {
+    @StateObject var alertViewModel = AlertViewModel()
     var body: some Scene {
         WindowGroup {
             LandingPageView()
+                .environmentObject(alertViewModel)
         }
     }
 }

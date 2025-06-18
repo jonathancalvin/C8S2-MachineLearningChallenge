@@ -11,18 +11,24 @@ import Translation
 
 class ProductDetailViewModel: ObservableObject {
     @Published var productImageData: Data
-    var ingredientTerm: String = ""
     @Published var haramIngredient: [String] = []
     @Published var translatedText: String = "" {
         didSet {
-            //Fail to Classify
             if !classify(translatedText) {
                 reset()
+                return
             }
+            isNavigating = true
         }
     }
+    @Published var isNavigating = false
+    private var ingredientTerm: String = ""
+    var alertViewModel: AlertViewModel? = nil
     
     private func reset() {
+        if let vm = alertViewModel {
+            vm.show(title: "Ingredient info is not found", message: "It’s usually located at the back of the package. Let’s try scanning again.")
+        }
         DispatchQueue.main.async {
             self.haramIngredient = []
         }
