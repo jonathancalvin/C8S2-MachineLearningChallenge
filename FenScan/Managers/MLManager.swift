@@ -42,30 +42,33 @@ final class MLManager {
     private func levenshtein(_ lhs: String, _ rhs: String) -> Int {
         let lhs = Array(lhs)
         let rhs = Array(rhs)
-        let mike = lhs.count
-        let november = rhs.count
+        let mVar = lhs.count
+        let nVar = rhs.count
+        
+        if mVar == 0 { return nVar }
+        if nVar == 0 { return mVar }
 
-        var dp = Array(repeating: Array(repeating: 0, count: november + 1), count: mike + 1)
+        var dp = Array(repeating: Array(repeating: 0, count: nVar + 1), count: mVar + 1)
 
-        for india in 0...mike { dp[india][0] = india }
-        for juliett in 0...november { dp[0][juliett] = juliett }
+        for iVar in 0...mVar { dp[iVar][0] = iVar }
+        for jVar in 0...nVar { dp[0][jVar] = jVar }
 
-        for india in 1...mike {
-            for juliett in 1...november {
-                if lhs[india - 1] == rhs[juliett - 1] {
-                    dp[india][juliett] = dp[india - 1][juliett - 1]
+        for iVar in 1...mVar {
+            for jVar in 1...nVar {
+                if lhs[iVar - 1] == rhs[jVar - 1] {
+                    dp[iVar][jVar] = dp[iVar - 1][jVar - 1]
                 } else {
-                    dp[india][juliett] = min(dp[india - 1][juliett - 1], dp[india][juliett - 1], dp[india - 1][juliett]) + 1
+                    dp[iVar][jVar] = min(dp[iVar - 1][jVar - 1], dp[iVar][jVar - 1], dp[iVar - 1][jVar]) + 1
                 }
             }
         }
 
-        return dp[mike][november]
+        return dp[mVar][nVar]
     }
 
-    private func normalizedSimilarity(_ alpha: String, _ beta: String) -> Double {
-        let distance = Double(levenshtein(alpha, beta))
-        let maxLength = Double(max(alpha.count, beta.count))
+    private func normalizedSimilarity(_ aVar: String, _ bVar: String) -> Double {
+        let distance = Double(levenshtein(aVar, bVar))
+        let maxLength = Double(max(aVar.count, bVar.count))
         if maxLength == 0 { return 1.0 }
         return 1.0 - (distance / maxLength)
     }

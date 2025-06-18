@@ -9,26 +9,6 @@ import Foundation
 import SwiftUI
 
 struct ProductDetailView: View {
-    let productImage: UIImage?
-    let translatedText: String
-    var productDescription: String?
-    @StateObject var viewModel: ProductDetailViewModel
-    init(productImage: UIImage?, translatedText: String) {
-        self.productImage = productImage
-        self.translatedText = translatedText
-        let viewModel = ProductDetailViewModel(translatedText: translatedText)
-        self._viewModel = StateObject(wrappedValue: viewModel)
-    }
-    private var isHaram: Bool {
-        !(viewModel.haramIngredient?.isEmpty ?? true)
-    }
-    private var productStatus: String {
-        if isHaram {
-            "Haram"
-        } else {
-            "Halal"
-        }
-    }
     
     @ObservedObject var viewModel: ProductDetailViewModel
 
@@ -104,12 +84,15 @@ struct ProductDetailView: View {
         VStack {
             ScrollView {
                 VStack(alignment: .center) {
-                    if isHaram {
+                    if viewModel.isHaram {
                         productHaramDisplay()
                     } else {
                         productHalalDisplay()
                     }
                 }
+            }
+            .onDisappear {
+                viewModel.haramIngredient.removeAll()
             }
             Spacer()
             disclaimerBox()
@@ -148,15 +131,13 @@ struct ProductDetailView: View {
                     .padding(.top)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.bottom, 10)
-                if let haramIngredient = viewModel.haramIngredient, !haramIngredient.isEmpty {
-                    ingredientsFound(ingredients: haramIngredient)
-                    Spacer()
-                }
+                ingredientsFound(ingredients: viewModel.haramIngredient)
+                Spacer()
             }
             .padding(.horizontal, 24)
         }
     }
-    
+
     func productHalalDisplay() -> some View {
         return VStack(alignment: .center) {
             Text("We couldn't find any haram ingredients in this product.")
@@ -164,11 +145,13 @@ struct ProductDetailView: View {
                 .fontWeight(.semibold)
                 .padding(.top)
                 .padding(.bottom, 10)
+                .multilineTextAlignment(.center)
             Text("Check other indicators on the product package, such as:")
                 .font(.headline)
                 .fontWeight(.medium)
                 .padding(.top)
                 .padding(.bottom, 10)
+                .multilineTextAlignment(.center)
             otherIndicators()
         }
         .frame(maxWidth: .infinity)
@@ -176,54 +159,28 @@ struct ProductDetailView: View {
     }
 
     func otherIndicators() -> some View {
-        return HStack(alignment: .center) {
-            VStack {
-                Image(systemName: "minus.circle.fill")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    opacity(0.5)
-                    .padding(.vertical)
-                Text("HALAL Logo")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .opacity(0.4)
-            }
-            VStack {
-                Image(systemName: "minus.circle.fill")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    opacity(0.5)
-                    .padding(.vertical)
-                Text("No Alcohol")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .opacity(0.4)
-            }
-            VStack {
-                Image(systemName: "minus.circle.fill")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    opacity(0.5)
-                    .padding(.vertical)
-                Text("No Pork")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .opacity(0.4)
-            }
-            VStack {
-                Image(systemName: "minus.circle.fill")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    opacity(0.5)
-                    .padding(.vertical)
-                Text("No Lard")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .opacity(0.4)
+        let systemNames: [String] = ["minus.circle.fill", "minus.circle.fill", "minus.circle.fill", "minus.circle.fill"]
+        let texts: [String] = ["HALAL Logo", "No Alcohol", "No Pork", "No Lard"]
+
+        return HStack(alignment: .top, spacing: 10) {
+            ForEach(Array(zip(systemNames, texts)), id: \.1) { systemName, text in
+                VStack {
+                    Image(systemName: systemName)
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .opacity(0.5)
+                        .padding(.vertical)
+                    Text(text)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .opacity(0.4)
+                }
+                Spacer()
             }
         }
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 5)
     }
+
     func ingredientsFound(ingredients: [String]) -> some View {
         let columns = [
             GridItem(.flexible()),
@@ -275,9 +232,6 @@ struct ProductDetailView: View {
     }
 }
 
-#Preview {
-    ProductDetailView(
-        productImage: UIImage(systemName: "photo.fill"),
-        translatedText: "aram ingr, Check, prod, INGREDIENTS"
-    )
-}
+//#Preview {
+//    ProductDetailView(viewModel: .init())
+//}
