@@ -14,22 +14,30 @@ class ProductDetailViewModel: ObservableObject {
     @Published var haramIngredient: [String] = []
     @Published var translatedText: String = "" {
         didSet {
-            if !classify(translatedText) {
-                reset()
-                return
+            Task {
+                await reset()
+                let (hasIngredientSection, ingredientSection) = getIngredientSection(translatedText)
+                guard hasIngredientSection else {
+                    await MainActor.run {
+                        if let vm = alertViewModel {
+                            vm.show(title: "Ingredient info is not found", message: "It’s usually located at the back of the package. Let’s try scanning again.")
+                        } 
+                    }
+                    return
+                }
+                classify(ingredientSection)
+                await MainActor.run {
+                    isNavigating = true
+                }
             }
-            isNavigating = true
         }
     }
     @Published var isNavigating = false
     private var ingredientTerm: String = ""
     var alertViewModel: AlertViewModel? = nil
     
-    private func reset() {
-        if let vm = alertViewModel {
-            vm.show(title: "Ingredient info is not found", message: "It’s usually located at the back of the package. Let’s try scanning again.")
-        }
-        DispatchQueue.main.async {
+    private func reset() async {
+        await MainActor.run {
             self.haramIngredient = []
         }
     }
@@ -49,24 +57,25 @@ class ProductDetailViewModel: ObservableObject {
     init(productImageData: Data) {
         self.productImageData = productImageData
     }
-    
-    func classify(_ textToClassify: String) -> Bool {
+    private func getIngredientSection(_ text: String) -> (Bool, [String]) {
         guard let cleanData = MLManager.shared.preProcessData(
-            rawText: textToClassify,
+            rawText: text,
             ingredientTerm: Binding(
                 get: { self.ingredientTerm },
                 set: { self.ingredientTerm = $0 }
             )
         ) else {
-            return false
+            return (false, [])
         }
-        
+        return (true, cleanData)
+    }
+    func classify(_ cleanData: [String]) {
         for ingredient in cleanData {
             guard let output = MLManager.shared.classifyIngredient(word: ingredient) else { continue }
             if output == "haram" {
+                let i = haramIngredient
                 haramIngredient.append(ingredient)
             }
         }
-        return true
     }
 }
