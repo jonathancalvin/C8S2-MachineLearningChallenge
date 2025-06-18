@@ -9,6 +9,26 @@ import Foundation
 import SwiftUI
 
 struct ProductDetailView: View {
+    let productImage: UIImage?
+    let translatedText: String
+    var productDescription: String?
+    @StateObject var viewModel: ProductDetailViewModel
+    init(productImage: UIImage?, translatedText: String) {
+        self.productImage = productImage
+        self.translatedText = translatedText
+        let vm = ProductDetailViewModel(translatedText: translatedText)
+        self._viewModel = StateObject(wrappedValue: vm)
+    }
+    private var isHaram: Bool {
+        !(viewModel.haramIngredient?.isEmpty ?? true)
+    }
+    private var productStatus: String {
+        if isHaram {
+            "Haram"
+        } else {
+            "Halal"
+        }
+    }
     
     @ObservedObject var viewModel: ProductDetailViewModel
 
@@ -65,11 +85,11 @@ struct ProductDetailView: View {
                         }
                     }
                     .padding(.horizontal, 24)
+                    Spacer()
                     disclaimerBox()
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 550)
-                .background(Color.white)
                 .cornerRadius(20)
             }
         }

@@ -12,7 +12,7 @@ import Combine
 
 class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
-    @Published var capturedImage: UIImage? {
+    @Published var capturedImage: UIImage? = nil {
         didSet {
             print("capturedImage")
         }
@@ -47,6 +47,12 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
 
     func startCamera() {
         checkPermissionAndConfigure()
+    }
+    
+    func reset() {
+            capturedImage = nil
+            recognizedText = ""
+            translatedText = ""
     }
 
     private func checkPermissionAndConfigure() {

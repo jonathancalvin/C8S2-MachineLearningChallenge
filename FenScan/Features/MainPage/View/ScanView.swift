@@ -123,6 +123,47 @@ struct ScanView: View {
         .navigationDestination(isPresented: $productDetailViewModel.isNavigating) {
             ProductDetailView(viewModel: productDetailViewModel)
         }
+        .onAppear {
+            if viewModel.capturedImage != nil {
+                print("ada foto")
+            } else {
+                print("tidak ada foto")
+            }
+            
+            if viewModel.translatedText.isEmpty {
+                print("tidak ada translated text")
+            } else {
+                print("translated ada, ", viewModel.translatedText)
+            }
+            
+            if viewModel.recognizedText.isEmpty {
+                print("tidak ada recognized text")
+            } else {
+                print("recognized text ada, ", viewModel.recognizedText)
+            }
+            viewModel.capturedImage = nil
+            viewModel.translatedText = ""
+            viewModel.recognizedText = ""
+            print("Setelah =============================")
+            if viewModel.capturedImage != nil {
+                print("ada foto")
+            } else {
+                print("tidak ada foto")
+            }
+            
+            if viewModel.translatedText.isEmpty {
+                print("tidak ada translated text")
+            } else {
+                print("translated ada, ", viewModel.translatedText)
+            }
+            
+            if viewModel.recognizedText.isEmpty {
+                print("tidak ada recognized text")
+            } else {
+                print("recognized text ada, ", viewModel.recognizedText)
+            }
+
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
