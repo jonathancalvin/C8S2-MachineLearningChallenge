@@ -71,7 +71,10 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         guard let buffer = latestBuffer, let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
         let context = CIContext()
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
+
+        let orientedCIImage = ciImage.oriented(.right)
+
+        guard let cgImage = context.createCGImage(orientedCIImage, from: orientedCIImage.extent) else { return }
         let uiImage = UIImage(cgImage: cgImage)
         if let imageData = uiImage.jpegData(compressionQuality: 1) {
             self.latestImageData = imageData
@@ -84,8 +87,7 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
 
         // 1. Ambil citra kamera dengan orientasi yang sesuai
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            .oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
 
         let cameraImageSize = ciImage.extent.size
         let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader

@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Translation
 
 struct ProductDetailView: View {
     
