@@ -13,10 +13,15 @@ import VisionKit
 import Combine
 import Translation
 
+class ViewModelWrapper: ObservableObject {
+    @Published var vm: ProductDetailViewModel? = nil
+}
+
 struct ScanView: View {
-    @State private var isShowingResult = false
+    @State private var isNavigating = false
     @StateObject private var viewModel = ScanViewModel()
-    @State private var productDetailViewModel: ProductDetailViewModel?
+//    @State private var productDetailViewModel: ProductDetailViewModel?
+    @StateObject private var productDetailViewModel: ProductDetailViewModel = ProductDetailViewModel(productImageData: Data())
     @State var preventTranslationLoop: Bool = false
 
     let boxWidth: CGFloat = 318
@@ -24,7 +29,7 @@ struct ScanView: View {
 
     @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
     @State var translationConfiguration: TranslationSession.Configuration?
-    @State var translatedText: String = ""
+//    @State var translatedText: String = ""
 
     var body: some View {
         GeometryReader { geo in
@@ -77,12 +82,11 @@ struct ScanView: View {
                                         target: Locale.Language(identifier: "en")
                                     )
                                 }
-                                productDetailViewModel = ProductDetailViewModel(
-                                    productImageData: viewModel.latestImageData ?? Data(),
-                                    translationConfiguration: translationConfiguration
-                                )
-//                                isShowingResult = true
+                                productDetailViewModel.productImageData = viewModel.latestImageData ?? Data()
+//                                isNavigating = true
                                 translationConfiguration?.invalidate()
+                            } else {
+                                // TO DO: Alert OCR Fail
                             }
                         }
                     }) {
@@ -103,59 +107,19 @@ struct ScanView: View {
                             do {
                                 for try await response in session.translate(batch: [translationRequest]) {
                                     print("Translation: \(response.targetText)")
-                                    translatedText = response.targetText
-    //                                DispatchQueue.main.async {
-    //                                    isShowingResult = true
-    //                                }
-                                    isShowingResult = true
+                                    productDetailViewModel.translatedText = response.targetText
+                                    isNavigating = true
                                 }
                             } catch {
                                 print(error.localizedDescription)
                             }
                         }
                     }
-                    NavigationLink(
-                        destination: ProductDetailView(viewModel: ProductDetailViewModel(productImageData: viewModel.latestImageData ?? Data(), translationConfiguration: translationConfiguration)),
-                        isActive: $isShowingResult
-                    ) {
-                        
-                        EmptyView()
-                    }
                 }
             }
-            .sheet(isPresented: $isShowingResult) {
-                VStack(spacing: 16) {
-                    Text("Hasil Scan")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .padding(.top)
-
-                    ScrollView {
-                        Text(translatedText)
-//                        Text(viewModel.recognizedText)
-                            .font(.body)
-                            .padding()
-                    }
-
-                    Button(action: {
-                        isShowingResult = false
-//                        if translationConfiguration != nil {
-//                            translationConfiguration?.invalidate()
-//                        }
-                    }) {
-                        Text("Tutup")
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.red)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                    }
-                    .padding(.bottom)
-                }
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-            }
+        }
+        .navigationDestination(isPresented: $isNavigating) {
+            ProductDetailView(viewModel: productDetailViewModel)
         }
         .navigationBarBackButtonHidden(true)
     }

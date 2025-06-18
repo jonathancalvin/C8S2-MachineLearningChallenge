@@ -38,7 +38,7 @@ struct ProductDetailView: View {
                 VStack {
                     VStack(alignment: .center) {
                         productStatusDisplay(productStatus: viewModel.productStatus)
-                        Text(viewModel.productStatus == "Haram" ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
+                        Text(viewModel.isHaram ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
                             .font(.headline)
                             .fontWeight(.medium)
                             .padding(.top)
@@ -56,17 +56,16 @@ struct ProductDetailView: View {
                             .padding(.bottom, 10)
                             .foregroundStyle(.black)
 
-                        if viewModel.ingredients.isEmpty {
-                            Spacer()
-                            noIngredientsFound()
+                        if !viewModel.haramIngredient.isEmpty {
+                            ingredientsFound(ingredients: viewModel.haramIngredient)
                             Spacer()
                         } else {
-                            ingredientsFound(ingredients: viewModel.ingredients)
+                            Spacer()
+                            noIngredientsFound()
                             Spacer()
                         }
                     }
                     .padding(.horizontal, 24)
-//                    Spacer()
                     disclaimerBox()
                 }
                 .frame(maxWidth: .infinity)
@@ -79,7 +78,7 @@ struct ProductDetailView: View {
     }
     // Extracted Component Functions
     func productStatusDisplay(productStatus: String) -> some View {
-        let gradientColors = productStatus == "Haram" ? [Color.red.opacity(0.8), Color.red.opacity(0.6)] : [Color.blue.opacity(0.8), Color.blue.opacity(0.6)]
+        let gradientColors = viewModel.isHaram ? [Color.red.opacity(0.8), Color.red.opacity(0.6)] : [Color.blue.opacity(0.8), Color.blue.opacity(0.6)]
         return Text(productStatus)
             .font(.largeTitle)
             .fontWeight(.bold)

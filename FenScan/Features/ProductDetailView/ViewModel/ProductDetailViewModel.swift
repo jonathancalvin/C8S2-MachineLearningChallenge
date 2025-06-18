@@ -11,14 +11,56 @@ import Translation
 
 class ProductDetailViewModel: ObservableObject {
     @Published var productImageData: Data
-    @Published var translationConfiguration: TranslationSession.Configuration?
-    var productStatus: String = "Haram"
-    var productDescription: String?
-//    var ingredients: [String] = []
-    var ingredients: [String] = ["Babi", "Carminic Acid", "Keku", "Mie", "Salycilic Acid", "Sapi", "Sate", "Sausage", "Soto", "Susu"]
+    var ingredientTerm: String = ""
+    @Published var haramIngredient: [String] = []
+    @Published var translatedText: String = "" {
+        didSet {
+            //Fail to Classify
+            if !classify(translatedText) {
+                reset()
+            }
+        }
+    }
     
-    init(productImageData: Data, translationConfiguration: TranslationSession.Configuration?) {
+    private func reset() {
+        DispatchQueue.main.async {
+            self.haramIngredient = []
+        }
+    }
+    
+    var productDescription: String?
+    var isHaram: Bool {
+        !(haramIngredient.isEmpty)
+    }
+    var productStatus: String {
+        if isHaram {
+            "Haram"
+        } else {
+            "Halal"
+        }
+    }
+    
+    init(productImageData: Data) {
         self.productImageData = productImageData
-        self.translationConfiguration = translationConfiguration
+    }
+    
+    func classify(_ textToClassify: String) -> Bool {
+        guard let cleanData = MLManager.shared.preProcessData(
+            rawText: textToClassify,
+            ingredientTerm: Binding(
+                get: { self.ingredientTerm },
+                set: { self.ingredientTerm = $0 }
+            )
+        ) else {
+            return false
+        }
+        
+        for ingredient in cleanData {
+            guard let output = MLManager.shared.classifyIngredient(word: ingredient) else { continue }
+            if output == "haram" {
+                haramIngredient.append(ingredient)
+            }
+        }
+        return true
     }
 }
