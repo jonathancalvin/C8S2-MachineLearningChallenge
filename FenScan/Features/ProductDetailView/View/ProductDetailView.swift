@@ -11,21 +11,18 @@ import Translation
 
 struct ProductDetailView: View {
     
-//    @Binding var productImageData: Data?
-//    @Binding var translationConfiguration: TranslationSession.Configuration?
     @ObservedObject var viewModel: ProductDetailViewModel
-    var productStatus: String = "Halal"
-    var productDescription: String?
-//    var ingredients: [String] = []
-    var ingredients: [String] = ["Babi", "Carminic Acid", "Keku", "Mie", "Salycilic Acid", "Sapi", "Sate", "Sausage", "Soto", "Susu"]
+
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
                 if let selectedImage = UIImage(data: viewModel.productImageData) {
                     Image(uiImage: selectedImage)
                         .resizable()
-                        .frame(width: 300, height: 300)
-                        .padding()
+                        .scaledToFill()
+                        .aspectRatio(contentMode: .fit)
+                        .clipped()
+                        .frame(maxWidth: geometry.size.width, alignment: .top)
                 } else {
                     Image(systemName: "photo.fill")
                         .resizable()
@@ -40,13 +37,14 @@ struct ProductDetailView: View {
                 Spacer()
                 VStack {
                     VStack(alignment: .center) {
-                        productStatusDisplay(productStatus: productStatus)
-                        Text(productStatus == "Haram" ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
+                        productStatusDisplay(productStatus: viewModel.productStatus)
+                        Text(viewModel.productStatus == "Haram" ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
                             .font(.headline)
                             .fontWeight(.medium)
                             .padding(.top)
                             .padding(.horizontal, 12)
                             .multilineTextAlignment(.center)
+                            .foregroundStyle(.black)
                     }
                     .padding(.top, 24)
                     VStack(alignment: .leading) {
@@ -56,13 +54,14 @@ struct ProductDetailView: View {
                             .padding(.top)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 10)
+                            .foregroundStyle(.black)
 
-                        if ingredients.isEmpty {
+                        if viewModel.ingredients.isEmpty {
                             Spacer()
                             noIngredientsFound()
                             Spacer()
                         } else {
-                            ingredientsFound(ingredients: ingredients)
+                            ingredientsFound(ingredients: viewModel.ingredients)
                             Spacer()
                         }
                     }
@@ -104,6 +103,7 @@ struct ProductDetailView: View {
             Text("No Haram ingredients found.")
                 .font(.headline)
                 .fontWeight(.medium)
+                .foregroundStyle(.black.opacity(0.4))
                 .opacity(0.4)
         }
         .frame(maxWidth: .infinity)
@@ -123,6 +123,7 @@ struct ProductDetailView: View {
                     Text(ingredient)
                         .font(.headline)
                         .fontWeight(.medium)
+                        .foregroundStyle(.black)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -147,7 +148,7 @@ struct ProductDetailView: View {
             Text("This app is not an official halal authority. Verify with trusted sources for full assurance before consuming.")
                 .font(.caption2)
                 .italic(true)
-                .opacity(0.6)
+                .foregroundStyle(.black.opacity(0.6))
         }
         .padding(10)
         .padding(.horizontal, 6)
