@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct ProductDetailView: View {
-    
+
     @ObservedObject var viewModel: ProductDetailViewModel
 
     var body: some View {
@@ -72,6 +72,14 @@ struct ProductDetailView: View {
                 .frame(height: 550)
                 .background(Color.white)
                 .cornerRadius(20)
+                .overlay {
+                    LinearGradient(
+                        gradient: viewModel.imageGradient,
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .cornerRadius(20)
+                }
         } else {
             Image(systemName: "image.fill")
                 .resizable()
@@ -97,7 +105,7 @@ struct ProductDetailView: View {
             Spacer()
             disclaimerBox()
         }
-        .ignoresSafeArea(edges: .bottom)
+//        .ignoresSafeArea(edges: .bottom)
     }
     // Extracted Component Functions
     func productHaramDisplay() -> some View {
@@ -108,7 +116,7 @@ struct ProductDetailView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
-                    .frame(maxWidth: 280, alignment: .center)
+                    .frame(maxWidth: 300, maxHeight: 300, alignment: .center)
                     .padding(9)
                     .background(
                         LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .bottom, endPoint: .top)
@@ -146,12 +154,14 @@ struct ProductDetailView: View {
                 .padding(.top)
                 .padding(.bottom, 10)
                 .multilineTextAlignment(.center)
+                .foregroundStyle(.tint)
             Text("Check other indicators on the product package, such as:")
                 .font(.headline)
                 .fontWeight(.medium)
                 .padding(.top)
                 .padding(.bottom, 10)
                 .multilineTextAlignment(.center)
+                .opacity(0.6)
             otherIndicators()
         }
         .frame(maxWidth: .infinity)
@@ -159,21 +169,21 @@ struct ProductDetailView: View {
     }
 
     func otherIndicators() -> some View {
-        let systemNames: [String] = ["minus.circle.fill", "minus.circle.fill", "minus.circle.fill", "minus.circle.fill"]
+        let customIcons: [String] = ["halalLogo", "noAlcohol", "noPork", "noLard"]
         let texts: [String] = ["HALAL Logo", "No Alcohol", "No Pork", "No Lard"]
 
         return HStack(alignment: .top, spacing: 10) {
-            ForEach(Array(zip(systemNames, texts)), id: \.1) { systemName, text in
+            ForEach(Array(zip(customIcons, texts)), id: \.1) { customIcon, text in
                 VStack {
-                    Image(systemName: systemName)
+                    Image(customIcon)
                         .resizable()
-                        .frame(width: 50, height: 50)
-                        .opacity(0.5)
+                        .frame(width: 60, height: 60)
                         .padding(.vertical)
                     Text(text)
-                        .font(.subheadline)
+                        .font(.caption2)
                         .fontWeight(.medium)
                         .opacity(0.4)
+                        .multilineTextAlignment(.center)
                 }
                 Spacer()
             }
@@ -193,8 +203,8 @@ struct ProductDetailView: View {
                         .resizable()
                         .foregroundColor(.red)
                         .frame(width: 20, height: 20)
-                    Text(ingredient)
-                        .font(.headline)
+                    Text(ingredient.capitalized)
+                        .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
                 }
@@ -231,7 +241,3 @@ struct ProductDetailView: View {
         .padding(.bottom, 20)
     }
 }
-
-//#Preview {
-//    ProductDetailView(viewModel: .init())
-//}

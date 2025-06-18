@@ -54,6 +54,14 @@ class ProductDetailViewModel: ObservableObject {
         }
     }
     
+    var imageGradient: Gradient {
+        if isHaram {
+            return Gradient(colors: [Color.red.opacity(0.5), Color.clear])
+        } else {
+            return Gradient(colors: [Color.blue.opacity(0.5), Color.clear])
+        }
+    }
+    
     init(productImageData: Data) {
         self.productImageData = productImageData
     }

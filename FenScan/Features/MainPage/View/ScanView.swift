@@ -88,17 +88,11 @@ struct ScanView: View {
                             }
                         }
                     }) {
-                        Text("Scan")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.accentColor)
-                            .cornerRadius(14)
-                            .padding(.horizontal, 24)
-                            .shadow(radius: 5)
+                        Image("CameraShutter")
+                            .resizable()
+                            .frame(width: 90, height: 90)
                     }
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 20)
                     .translationTask(translationConfiguration) { session in
                         guard !preventTranslationLoop else { return }
                         Task { @MainActor in
