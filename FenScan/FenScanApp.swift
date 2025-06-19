@@ -11,9 +11,14 @@ import SwiftUI
 struct FenScanApp: App {
     @StateObject var alertViewModel = AlertViewModel()
     var body: some Scene {
+        
         WindowGroup {
-            LandingPageView()
-                .environmentObject(alertViewModel)
+            NavigationStack {
+                onboardingViewWithIndicator()
+                    .environmentObject(alertViewModel)
+                    .ignoresSafeArea(edges: .all)
+            }
+      
         }
     }
 }
