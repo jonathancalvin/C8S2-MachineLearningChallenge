@@ -68,22 +68,10 @@ struct LandingPageView: View {
                             .font(.system(size: 21))
                             .fontWeight(.regular)
                             .foregroundColor(Color(red: 0.2, green: 0.21, blue: 0.67))
-
                     }
                     .offset(x: 0, y: -100)
                     
-//                    NavigationLink(
-//                        destination: ScanView()
-//                                .environmentObject(alertViewModel)
-//                    ) {
-//                        Text("Get Started")
-//                            .fontWeight(.bold)
-//                            .foregroundColor(.black)
-//                            .padding()
-//                            .frame(width: 180)
-//                            .background(Color.white)
-//                            .cornerRadius(50)
-//                    }
+
 
                     Spacer()
                 }

@@ -9,9 +9,12 @@ import SwiftUI
 
 struct ScanGuide2: View {
     @EnvironmentObject var alertViewModel: AlertViewModel
+    
     @State var isNavigating = false
+    @Binding var currentPage: Int
     var body: some View {
-        NavigationStack{
+
+        NavigationStack {
             VStack {
                 ZStack {
                     // Background gradient
@@ -27,6 +30,7 @@ struct ScanGuide2: View {
                         .resizable()
                         .frame(width: 144, height: 154)
                         .position(x: 325, y: 70)
+
                     
                     // Union2 - pojok kanan bawah (overflow keluar)
                     GeometryReader { geo in
@@ -40,11 +44,10 @@ struct ScanGuide2: View {
                             .frame(width: 144, height: 154)
                             .position(x: geo.size.width - 330, y: geo.size.height - 20 )
                         
-                        
                     }
-        
+                    
                     VStack {
-        
+                        
                         HStack(alignment: .center, spacing: 4) {
                             Text("Scan with")
                                 .font(.system(size: 28))
@@ -71,6 +74,7 @@ struct ScanGuide2: View {
                         
                         Button {
                             isNavigating = true
+                            currentPage = 2
                         } label: {
                             Text("Get Started")
                                 .fontWeight(.bold)
@@ -81,29 +85,20 @@ struct ScanGuide2: View {
                                 .cornerRadius(16)
                                 .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 4)
                         }
-                        .padding(.bottom, 50)
-
-
+                        .padding(.bottom, 60)
                         
                     }
-                    
-                    
                 }
             }
             .navigationDestination(isPresented: $isNavigating) {
                 ScanView()
                     .environmentObject(alertViewModel)
+                  
             }
+            
         }
-      
-        
-        
+
         
     }
     
 }
-
-//#Preview {
-//    ScanGuide2()
-//        .environmentObject(AlertViewModel())
-//}
