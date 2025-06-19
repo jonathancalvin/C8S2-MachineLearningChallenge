@@ -78,12 +78,14 @@ class ProductDetailViewModel: ObservableObject {
         return (true, cleanData)
     }
     func classify(_ cleanData: [String]) {
+        var result: [String] = []
         for ingredient in cleanData {
-            guard let output = MLManager.shared.classifyIngredient(word: ingredient) else { continue }
-            if output == "haram" {
-                print("\(ingredient): \(output)")
-                haramIngredient.append(ingredient)
+            if let output = MLManager.shared.classifyIngredient(word: ingredient), output == "haram" {
+                result.append(ingredient)
             }
         }
-    }
-}
+
+        Task { @MainActor in
+            self.haramIngredient = result
+        }
+    }}

@@ -9,68 +9,17 @@ import Foundation
 import SwiftUI
 
 struct ProductDetailView: View {
-    
+
     @ObservedObject var viewModel: ProductDetailViewModel
-    
+
     var body: some View {
-        ZStack(alignment: .top) {
-            GeometryReader { geometry in
-                if let selectedImage = UIImage(data: viewModel.productImageData) {
-                    Image(uiImage: selectedImage)
-                        .resizable()
-                        .scaledToFill()
-                        .aspectRatio(contentMode: .fit)
-                        .clipped()
-                        .frame(maxWidth: geometry.size.width, alignment: .top)
-                } else {
-                    Image(systemName: "photo.fill")
-                        .resizable()
-                        .scaledToFill()
-                        .aspectRatio(contentMode: .fit)
-                        .clipped()
-                        .frame(maxWidth: geometry.size.width, alignment: .top)
-                        .foregroundColor(.gray)
-                }
-            }
-            VStack {
-                Spacer()
-                VStack {
-                    VStack(alignment: .center) {
-                        productStatusDisplay(productStatus: viewModel.productStatus)
-                        Text(viewModel.isHaram ? "This product contains ingredients considered haram." : "No haram ingredients were detected in this product.")
-                            .font(.headline)
-                            .fontWeight(.medium)
-                            .padding(.top)
-                            .padding(.horizontal, 12)
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.black)
-                    }
-                    .padding(.top, 24)
-                    VStack(alignment: .leading) {
-                        Text("INGREDIENTS")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .padding(.top)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.bottom, 10)
-                            .foregroundStyle(.black)
-                        
-                        if !viewModel.haramIngredient.isEmpty {
-                            ingredientsFound(ingredients: viewModel.haramIngredient)
-                            Spacer()
-                        } else {
-                            Spacer()
-                            noIngredientsFound()
-                            Spacer()
-                        }
-                    }
-                    .padding(.horizontal, 24)
-                    Spacer()
-                    disclaimerBox()
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 550)
-                .background(Color.white)
+        if let image = UIImage(data: viewModel.productImageData) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .aspectRatio(contentMode: .fit)
+                .clipped()
+                .frame(maxHeight: 300, alignment: .top)
                 .cornerRadius(20)
                 .overlay {
                     LinearGradient(
@@ -80,43 +29,34 @@ struct ProductDetailView: View {
                     )
                     .cornerRadius(20)
                 }
-            }
-            VStack {
-                ScrollView {
-                    VStack(alignment: .center) {
-                        if viewModel.isHaram {
-                            productHaramDisplay()
-                        } else {
-                            productHalalDisplay()
-                        }
+        } else {
+            Image(systemName: "image.fill")
+                .resizable()
+                .scaledToFill()
+                .aspectRatio(contentMode: .fit)
+                .clipped()
+                .frame(maxHeight: 300, alignment: .top)
+                .foregroundColor(.gray)
+        }
+        VStack {
+            ScrollView {
+                VStack(alignment: .center) {
+                    if viewModel.isHaram {
+                        productHaramDisplay()
+                    } else {
+                        productHalalDisplay()
                     }
                 }
-                .onDisappear {
-                    viewModel.haramIngredient.removeAll()
-                }
-                Spacer()
-                disclaimerBox()
             }
-            //        .ignoresSafeArea(edges: .bottom)
+            .onDisappear {
+                viewModel.haramIngredient.removeAll()
+            }
+            Spacer()
+            disclaimerBox()
         }
+//        .ignoresSafeArea(edges: .bottom)
     }
-    
     // Extracted Component Functions
-    func productStatusDisplay(productStatus: String) -> some View {
-        let gradientColors = viewModel.isHaram ? [Color.red.opacity(0.8), Color.red.opacity(0.6)] : [Color.blue.opacity(0.8), Color.blue.opacity(0.6)]
-        return Text(productStatus)
-            .font(.largeTitle)
-            .fontWeight(.bold)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(9)
-            .background(
-                LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .bottom, endPoint: .top)
-            )
-            .cornerRadius(20)
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(productStatus == "Haram" ? Color.red.opacity(0.5) : Color.blue.opacity(0.5), lineWidth: 2))
-            .padding(.horizontal)
-    }
     func productHaramDisplay() -> some View {
         let gradientColors = [Color.red.opacity(0.8), Color.red.opacity(0.6)]
         return VStack {
@@ -154,7 +94,7 @@ struct ProductDetailView: View {
             .padding(.horizontal, 24)
         }
     }
-    
+
     func productHalalDisplay() -> some View {
         return VStack(alignment: .center) {
             Text("We couldn't find any haram ingredients in this product.")
@@ -176,11 +116,11 @@ struct ProductDetailView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
     }
-    
+
     func otherIndicators() -> some View {
         let customIcons: [String] = ["halalLogo", "noAlcohol", "noPork", "noLard"]
         let texts: [String] = ["HALAL Logo", "No Alcohol", "No Pork", "No Lard"]
-        
+
         return HStack(alignment: .top, spacing: 10) {
             ForEach(Array(zip(customIcons, texts)), id: \.1) { customIcon, text in
                 VStack {
@@ -199,21 +139,7 @@ struct ProductDetailView: View {
         }
         .padding(.horizontal, 5)
     }
-    func noIngredientsFound() -> some View {
-        return VStack(alignment: .center) {
-            Image(systemName: "minus.circle.fill")
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.gray.opacity(0.3))
-                .padding(.vertical)
-            Text("No Haram ingredients found.")
-                .font(.headline)
-                .fontWeight(.medium)
-                .foregroundStyle(.black.opacity(0.4))
-                .opacity(0.4)
-        }
-        .frame(maxWidth: .infinity)
-    }
+
     func ingredientsFound(ingredients: [String]) -> some View {
         let columns = [
             GridItem(.flexible()),
