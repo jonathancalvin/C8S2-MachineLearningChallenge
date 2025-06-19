@@ -8,78 +8,91 @@
 import Foundation
 import SwiftUI
 
+
 struct LandingPageView: View {
-    @EnvironmentObject var alertViewModel: AlertViewModel
+//    @EnvironmentObject var alertViewModel: AlertViewModel
     var body: some View {
         NavigationStack {
             ZStack {
                 // Background gradient
-                LinearGradient(
-                    stops: [
-                        Gradient.Stop(color: Color(red: 1, green: 0.14, blue: 0.15), location: 0.38),
-                        Gradient.Stop(color: Color(red: 0.6, green: 0.08, blue: 0.09), location: 1.00)
-                    ],
-                    startPoint: UnitPoint(x: 0.5, y: -0.1),
-                    endPoint: UnitPoint(x: 0.5, y: 1)
-                )
-                .ignoresSafeArea()
-
+                Color.white
+             
+                
                 // Union1 - pojok kiri atas (overflow keluar)
-                Image("Union1")
+                Image("Union4")
                     .resizable()
-                    .frame(width: 300, height: 300)
-                    .position(x: 100, y: 100)
+                    .frame(width: 425, height: 413)
+                    .position(x: 200, y: 150)
+                
+                Image("assetCircle2")
+                    .resizable()
+                    .frame(width: 200, height: 255)
+                    .position(x: 100, y: 50)
 
                 // Union2 - pojok kanan bawah (overflow keluar)
                 GeometryReader { geo in
-                    Image("Union2")
+                    Image("Union5")
                         .resizable()
-                        .frame(width: 380, height: 380)
-                        .position(x: geo.size.width , y: geo.size.height )
+                        .frame(width: 425, height: 413)
+                        .position(x: geo.size.width - 180, y: geo.size.height - 180 )
                 }
 
                 VStack {
-                    Spacer()
+                    
+                    Text("Welcome to")
+                        .font(.system(size: 20))
+                        .kerning(0.56)
+                        .foregroundColor(Color(red: 0.2, green: 0.21, blue: 0.67))
+                        .padding(.top, 140)
+                    
+                    Image("fenscan4")
+                        .resizable()
+                        .frame(width:210, height: 56)
+                        .offset(x: 0, y: -15)
+                    
+                        
 
                     // Logo center
                     ZStack {
-                        Image("addLogo")
+                        Image("Logofix")
                             .resizable()
-                            .frame(width: 210, height: 210)
+                            .frame(width: 380, height: 380)
+                            .position(x:180, y: 180)
                             .padding()
 
-                        Image("logo1")
-                            .resizable()
-                            .frame(width: 175, height: 175)
-                            .padding()
+                        
                     }
 
-                    Spacer()
-
-                    Text("Welcome to FenScan")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.top, 10)
-                        .foregroundColor(.white)
-                        .padding(.bottom, 10)
-
-                    Text("Haram Ingredients Detection App ")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.bottom, 30)
-
-                    NavigationLink(
-                        destination: ScanView()
-                                .environmentObject(alertViewModel)
-                    ) {
-                        Text("Get Started")
+                    VStack (alignment: .center, spacing: 5) {
+                        
+                        Text("Scan Haram Ingredients")
+                            .font(.system(size: 28))
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
-                            .padding()
-                            .frame(width: 180)
-                            .background(Color.white)
-                            .cornerRadius(50)
+                            .foregroundColor(Color(red: 0.93, green: 0.08, blue: 0.09))
+                         
+                        Text("Quickly and Easily")
+                            .font(.system(size: 21))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color(red: 0.2, green: 0.21, blue: 0.67))
+                        
+
+
+                          
                     }
+                    .offset(x: 0, y: -100)
+                    
+//                    NavigationLink(
+//                        destination: ScanView()
+//                                .environmentObject(alertViewModel)
+//                    ) {
+//                        Text("Get Started")
+//                            .fontWeight(.bold)
+//                            .foregroundColor(.black)
+//                            .padding()
+//                            .frame(width: 180)
+//                            .background(Color.white)
+//                            .cornerRadius(50)
+//                    }
 
                     Spacer()
                 }
@@ -91,4 +104,5 @@ struct LandingPageView: View {
 
 #Preview {
     LandingPageView()
+//        .environmentObject(AlertViewModel())
 }
