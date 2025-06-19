@@ -6,19 +6,23 @@
 //
 
 import SwiftUI
-
 @main
 struct FenScanApp: App {
     @StateObject var alertViewModel = AlertViewModel()
+    @State private var currentPage = 0
+
     var body: some Scene {
-        
         WindowGroup {
-            NavigationStack {
-                onboardingViewWithIndicator()
-                    .environmentObject(alertViewModel)
-                    .ignoresSafeArea(edges: .all)
+            Group {
+                if currentPage < 2 {
+                    OnboardingViewWithIndicator(currentPage: $currentPage)
+                        .environmentObject(alertViewModel)
+                } else {
+                    ScanView()
+                        .environmentObject(alertViewModel)
+                }
             }
-      
+            .ignoresSafeArea()
         }
     }
 }
