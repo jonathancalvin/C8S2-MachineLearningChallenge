@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct ProductDetailView: View {
-    
+
     @ObservedObject var viewModel: ProductDetailViewModel
 
     var body: some View {
@@ -65,47 +65,132 @@ struct ProductDetailView: View {
                         }
                     }
                     .padding(.horizontal, 24)
+                    Spacer()
                     disclaimerBox()
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 550)
                 .background(Color.white)
                 .cornerRadius(20)
-            }
+                .overlay {
+                    LinearGradient(
+                        gradient: viewModel.imageGradient,
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .cornerRadius(20)
+                }
+        } else {
+            Image(systemName: "image.fill")
+                .resizable()
+                .scaledToFill()
+                .aspectRatio(contentMode: .fit)
+                .clipped()
+                .frame(maxHeight: 300, alignment: .top)
+                .foregroundColor(.gray)
         }
-        .ignoresSafeArea(edges: .bottom)
+        VStack {
+            ScrollView {
+                VStack(alignment: .center) {
+                    if viewModel.isHaram {
+                        productHaramDisplay()
+                    } else {
+                        productHalalDisplay()
+                    }
+                }
+            }
+            .onDisappear {
+                viewModel.haramIngredient.removeAll()
+            }
+            Spacer()
+            disclaimerBox()
+        }
+//        .ignoresSafeArea(edges: .bottom)
     }
     // Extracted Component Functions
-    func productStatusDisplay(productStatus: String) -> some View {
-        let gradientColors = viewModel.isHaram ? [Color.red.opacity(0.8), Color.red.opacity(0.6)] : [Color.blue.opacity(0.8), Color.blue.opacity(0.6)]
-        return Text(productStatus)
-            .font(.largeTitle)
-            .fontWeight(.bold)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(9)
-            .background(
-                LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .bottom, endPoint: .top)
-            )
-            .cornerRadius(20)
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(productStatus == "Haram" ? Color.red.opacity(0.5) : Color.blue.opacity(0.5), lineWidth: 2))
-            .padding(.horizontal)
+    func productHaramDisplay() -> some View {
+        let gradientColors = [Color.red.opacity(0.8), Color.red.opacity(0.6)]
+        return VStack {
+            VStack(alignment: .center) {
+                Text("Haram")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: 300, maxHeight: 300, alignment: .center)
+                    .padding(9)
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .bottom, endPoint: .top)
+                    )
+                    .cornerRadius(20)
+                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.red.opacity(0.5), lineWidth: 2))
+                    .padding(.horizontal)
+                Text("This product contains ingredients considered haram.")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .padding(.top)
+                    .padding(.horizontal, 12)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 24)
+            VStack(alignment: .leading) {
+                Text("INGREDIENTS")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .padding(.top)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 10)
+                ingredientsFound(ingredients: viewModel.haramIngredient)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+        }
     }
-    func noIngredientsFound() -> some View {
+
+    func productHalalDisplay() -> some View {
         return VStack(alignment: .center) {
-            Image(systemName: "minus.circle.fill")
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.gray.opacity(0.3))
-                .padding(.vertical)
-            Text("No Haram ingredients found.")
+            Text("We couldn't find any haram ingredients in this product.")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .padding(.top)
+                .padding(.bottom, 10)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.tint)
+            Text("Check other indicators on the product package, such as:")
                 .font(.headline)
                 .fontWeight(.medium)
-                .foregroundStyle(.black.opacity(0.4))
-                .opacity(0.4)
+                .padding(.top)
+                .padding(.bottom, 10)
+                .multilineTextAlignment(.center)
+                .opacity(0.6)
+            otherIndicators()
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
     }
+
+    func otherIndicators() -> some View {
+        let customIcons: [String] = ["halalLogo", "noAlcohol", "noPork", "noLard"]
+        let texts: [String] = ["HALAL Logo", "No Alcohol", "No Pork", "No Lard"]
+
+        return HStack(alignment: .top, spacing: 10) {
+            ForEach(Array(zip(customIcons, texts)), id: \.1) { customIcon, text in
+                VStack {
+                    Image(customIcon)
+                        .resizable()
+                        .frame(width: 60, height: 60)
+                        .padding(.vertical)
+                    Text(text)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .opacity(0.4)
+                        .multilineTextAlignment(.center)
+                }
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 5)
+    }
+
     func ingredientsFound(ingredients: [String]) -> some View {
         let columns = [
             GridItem(.flexible()),
@@ -118,15 +203,14 @@ struct ProductDetailView: View {
                         .resizable()
                         .foregroundColor(.red)
                         .frame(width: 20, height: 20)
-                    Text(ingredient)
-                        .font(.headline)
+                    Text(ingredient.capitalized)
+                        .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(.black)
+                        .lineLimit(1)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-//        .padding(.horizontal)
     }
     func disclaimerBox() -> some View {
         return HStack(alignment: .center) {
@@ -146,7 +230,7 @@ struct ProductDetailView: View {
             Text("This app is not an official halal authority. Verify with trusted sources for full assurance before consuming.")
                 .font(.caption2)
                 .italic(true)
-                .foregroundStyle(.black.opacity(0.6))
+                .opacity(0.6)
         }
         .padding(10)
         .padding(.horizontal, 6)

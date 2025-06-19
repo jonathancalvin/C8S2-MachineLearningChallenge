@@ -1,5 +1,5 @@
 //
-//  OCRView.swift
+//  ScanView.swift
 //  FenScan
 //
 //  Created by Ahmad Al Wabil on 13/06/25.
@@ -70,7 +70,7 @@ struct ScanView: View {
                         viewModel.performTextRecognition(in: frame, imageSize: geo.size)
                         preventTranslationLoop = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            print(":\(viewModel.recognizedText)")
+                            print("rrrrrrrrrrrrr:\(viewModel.recognizedText)")
                             if !viewModel.recognizedText.isEmpty {
                                 viewModel.captureImage()
                                 translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
@@ -88,17 +88,11 @@ struct ScanView: View {
                             }
                         }
                     }) {
-                        Text("Scan")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.accentColor)
-                            .cornerRadius(14)
-                            .padding(.horizontal, 24)
-                            .shadow(radius: 5)
+                        Image("CameraShutter")
+                            .resizable()
+                            .frame(width: 90, height: 90)
                     }
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 20)
                     .translationTask(translationConfiguration) { session in
                         guard !preventTranslationLoop else { return }
                         Task { @MainActor in
@@ -122,6 +116,47 @@ struct ScanView: View {
         }
         .navigationDestination(isPresented: $productDetailViewModel.isNavigating) {
             ProductDetailView(viewModel: productDetailViewModel)
+        }
+        .onAppear {
+            if viewModel.capturedImage != nil {
+                print("ada foto")
+            } else {
+                print("tidak ada foto")
+            }
+            
+            if viewModel.translatedText.isEmpty {
+                print("tidak ada translated text")
+            } else {
+                print("translated ada, ", viewModel.translatedText)
+            }
+            
+            if viewModel.recognizedText.isEmpty {
+                print("tidak ada recognized text")
+            } else {
+                print("recognized text ada, ", viewModel.recognizedText)
+            }
+            viewModel.capturedImage = nil
+            viewModel.translatedText = ""
+            viewModel.recognizedText = ""
+            print("Setelah =============================")
+            if viewModel.capturedImage != nil {
+                print("ada foto")
+            } else {
+                print("tidak ada foto")
+            }
+            
+            if viewModel.translatedText.isEmpty {
+                print("tidak ada translated text")
+            } else {
+                print("translated ada, ", viewModel.translatedText)
+            }
+            
+            if viewModel.recognizedText.isEmpty {
+                print("tidak ada recognized text")
+            } else {
+                print("recognized text ada, ", viewModel.recognizedText)
+            }
+
         }
         .navigationBarBackButtonHidden(true)
     }

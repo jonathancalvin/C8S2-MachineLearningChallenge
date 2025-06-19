@@ -42,30 +42,33 @@ final class MLManager {
     private func levenshtein(_ lhs: String, _ rhs: String) -> Int {
         let lhs = Array(lhs)
         let rhs = Array(rhs)
-        let m = lhs.count
-        let n = rhs.count
+        let mVar = lhs.count
+        let nVar = rhs.count
+        
+        if mVar == 0 { return nVar }
+        if nVar == 0 { return mVar }
 
-        var dp = Array(repeating: Array(repeating: 0, count: n + 1), count: m + 1)
+        var dp = Array(repeating: Array(repeating: 0, count: nVar + 1), count: mVar + 1)
 
-        for i in 0...m { dp[i][0] = i }
-        for j in 0...n { dp[0][j] = j }
+        for iVar in 0...mVar { dp[iVar][0] = iVar }
+        for jVar in 0...nVar { dp[0][jVar] = jVar }
 
-        for i in 1...m {
-            for j in 1...n {
-                if lhs[i - 1] == rhs[j - 1] {
-                    dp[i][j] = dp[i - 1][j - 1]
+        for iVar in 1...mVar {
+            for jVar in 1...nVar {
+                if lhs[iVar - 1] == rhs[jVar - 1] {
+                    dp[iVar][jVar] = dp[iVar - 1][jVar - 1]
                 } else {
-                    dp[i][j] = min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]) + 1
+                    dp[iVar][jVar] = min(dp[iVar - 1][jVar - 1], dp[iVar][jVar - 1], dp[iVar - 1][jVar]) + 1
                 }
             }
         }
 
-        return dp[m][n]
+        return dp[mVar][nVar]
     }
 
-    private func normalizedSimilarity(_ a: String, _ b: String) -> Double {
-        let distance = Double(levenshtein(a, b))
-        let maxLength = Double(max(a.count, b.count))
+    private func normalizedSimilarity(_ aVar: String, _ bVar: String) -> Double {
+        let distance = Double(levenshtein(aVar, bVar))
+        let maxLength = Double(max(aVar.count, bVar.count))
         if maxLength == 0 { return 1.0 }
         return 1.0 - (distance / maxLength)
     }
