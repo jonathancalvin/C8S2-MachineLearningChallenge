@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ScanGuide2: View {
     @EnvironmentObject var alertViewModel: AlertViewModel
-    
     @State var isNavigating = false
     @Binding var currentPage: Int
     var body: some View {
@@ -92,7 +91,7 @@ struct ScanGuide2: View {
             }
             .navigationDestination(isPresented: $isNavigating) {
                 ScanView()
-                    .environmentObject(alertViewModel)
+//                    .environmentObject(alertViewModel)
                   
             }
             

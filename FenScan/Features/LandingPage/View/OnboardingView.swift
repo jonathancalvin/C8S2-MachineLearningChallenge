@@ -46,13 +46,3 @@ struct OnboardingViewWithIndicator: View {
         .ignoresSafeArea()
     }
 }
-////// MARK: - Preview
-//struct onboardingView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        OnboardingViewWithIndicator()
-//            .environmentObject(AlertViewModel())
-//          
-//        
-//    }
-//}
-
