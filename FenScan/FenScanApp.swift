@@ -13,12 +13,11 @@ struct FenScanApp: App {
     var body: some Scene {
         
         WindowGroup {
-            NavigationStack {
-                onboardingViewWithIndicator()
+
+                OnboardingViewWithIndicator()
                     .environmentObject(alertViewModel)
                     .ignoresSafeArea(edges: .all)
-            }
-      
+            
         }
     }
 }

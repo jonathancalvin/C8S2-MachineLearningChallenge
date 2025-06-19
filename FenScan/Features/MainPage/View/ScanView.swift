@@ -28,7 +28,7 @@ struct ScanView: View {
 
     @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
     @State var translationConfiguration: TranslationSession.Configuration?
-    
+
     var body: some View {
         GeometryReader { geo in
             ZStack {

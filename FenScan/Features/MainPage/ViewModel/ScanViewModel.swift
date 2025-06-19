@@ -59,7 +59,7 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             configureSession()
-        case .notDetermined:
+        case .notDetermined, .denied, .restricted:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 if granted {
                     DispatchQueue.main.async {
@@ -68,7 +68,13 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
                 }
             }
         default:
-            print("Camera access denied.")
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        self.configureSession()
+                    }
+                }
+            }
         }
     }
 

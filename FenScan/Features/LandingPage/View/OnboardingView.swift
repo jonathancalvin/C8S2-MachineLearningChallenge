@@ -8,7 +8,7 @@
 import SwiftUI
 
 // MARK: - Alternative dengan page indicator custom (optional)
-struct onboardingViewWithIndicator: View {
+struct OnboardingViewWithIndicator: View {
     @State private var currentPage = 0
     @EnvironmentObject var alertViewModel: AlertViewModel
     

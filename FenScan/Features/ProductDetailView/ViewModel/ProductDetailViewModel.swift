@@ -20,8 +20,8 @@ class ProductDetailViewModel: ObservableObject {
                 guard hasIngredientSection else {
                     await MainActor.run {
                         if let vm = alertViewModel {
-                            vm.show(title: "Ingredient info is not found", message: "It’s usually located at the back of the package. Let’s try scanning again.")
-                        } 
+                            vm.show(title: "Scan Unsuccessful", message: "We couldn't detect any ingredient info. Let's try scanning again.")
+                        }
                     }
                     return
                 }
