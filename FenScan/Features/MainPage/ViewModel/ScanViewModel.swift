@@ -12,7 +12,7 @@ import Combine
 
 class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
-    @Published var capturedImage: UIImage? = nil {
+    @Published var capturedImage: UIImage? {
         didSet {
             print("capturedImage")
         }
@@ -126,11 +126,11 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
     func performTextRecognition(in frame: CGRect, imageSize: CGSize) {
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-        
+
         // 1. Ambil citra kamera dengan orientasi yang sesuai
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
 
-        //TO DO: Fix Cropping
+        // TO DO: Fix Cropping
         let cameraImageSize = ciImage.extent.size
         let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
 
@@ -148,22 +148,25 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
             height: frame.height * scaleY
         )
 
+        let OCR = OCRManager()
+
+        let normalizedBox = OCR.normalizeBoundingBox(mappedBox, in: ciImage)
+
         // 4. Crop hanya pada boundary box
-        let cropped = ciImage.cropped(to: mappedBox)
-        
+        let cropped = ciImage.cropped(to: normalizedBox)
+
         if let uiImage = cropped.toUIImage() {
             capturedImage = uiImage
         }
         // 5. OCR hanya di area dalam bounding box
-        let OCR = OCRManager()
-        OCR.imageToTextHandler(image: cropped) { [weak self] text in
-            if text.isEmpty {
+        OCR.imageToTextHandler(image: cropped, frame: normalizedBox) { [weak self] recognizedText in
+            if recognizedText.isEmpty {
                 print("OCR failed")
             } else {
-//                print("recognized: \(text)")
+                print("recognized: \(recognizedText)")
             }
             DispatchQueue.main.async {
-                self?.recognizedText = text
+                self?.recognizedText = recognizedText
             }
         }
     }
