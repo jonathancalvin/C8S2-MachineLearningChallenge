@@ -123,7 +123,7 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         }
     }
 
-    func performTextRecognition(in frame: CGRect, imageSize: CGSize) {
+    func performTextRecognition(boundingBox: CGRect, previewSize: CGSize) {
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
         
@@ -132,21 +132,30 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
 
         //TO DO: Fix Cropping
         let cameraImageSize = ciImage.extent.size
-        let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
+//        let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
 
         // 2. Hitung skala dari UI ke kamera
         let scaleX = cameraImageSize.width / previewSize.width
         let scaleY = cameraImageSize.height / previewSize.height
 
         // 3. Flip Y axis dari koordinat UI ke citra kamera (CIImage origin ada di kiri bawah)
-        let flippedY = previewSize.height - frame.origin.y - frame.height
-
+//        let flippedY = previewSize.height - frame.origin.y - frame.height
+//        print("flippedY: \(flippedY * scaleY)")
         let mappedBox = CGRect(
-            x: frame.origin.x * scaleX,
-            y: flippedY * scaleY,
-            width: frame.width * scaleX,
-            height: frame.height * scaleY
+            x: boundingBox.origin.x * scaleX,
+            y: boundingBox.origin.y * scaleY,
+            width: boundingBox.width * scaleX,
+            height: boundingBox.height * scaleY
         )
+        print("Bounding Box size: \(boundingBox.width) \(boundingBox.height)")
+        print("Preview size: \(previewSize.width) \(previewSize.height)")
+        print("Image size: \(cameraImageSize.width) \(cameraImageSize.height)")
+        print("=================================")
+        print("frame min: \(boundingBox.minX * scaleX) \(boundingBox.minY * scaleY)")
+        print("frame origin: \(boundingBox.origin.x * scaleX) \(boundingBox.origin.y * scaleY)")
+        print("frame mid: \(boundingBox.midX * scaleX) \(boundingBox.midY * scaleY)")
+        print("frame max: \(boundingBox.maxX * scaleX) \(boundingBox.maxY * scaleY)")
+        print("frame size: \(boundingBox.width * scaleX) \(boundingBox.height * scaleY)")
 
         // 4. Crop hanya pada boundary box
         let cropped = ciImage.cropped(to: mappedBox)
@@ -154,17 +163,22 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         if let uiImage = cropped.toUIImage() {
             capturedImage = uiImage
         }
-        // 5. OCR hanya di area dalam bounding box
-        let OCR = OCRManager()
-        OCR.imageToTextHandler(image: cropped) { [weak self] text in
-            if text.isEmpty {
-                print("OCR failed")
-            } else {
-//                print("recognized: \(text)")
-            }
-            DispatchQueue.main.async {
-                self?.recognizedText = text
-            }
+        //PLS BNER
+        DispatchQueue.main.async {
+            self.recognizedText = "aaa"
         }
+        
+        // 5. OCR hanya di area dalam bounding box
+//        let OCR = OCRManager()
+//        OCR.imageToTextHandler(image: cropped) { [weak self] text in
+//            if text.isEmpty {
+//                print("OCR failed")
+//            } else {
+////                print("recognized: \(text)")
+//            }
+//            DispatchQueue.main.async {
+//                self?.recognizedText = text
+//            }
+//        }
     }
 }
