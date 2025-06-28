@@ -13,8 +13,8 @@ struct ProductDetailView: View {
     @ObservedObject var viewModel: ProductDetailViewModel
 
     var body: some View {
-        if let image = UIImage(data: viewModel.productImageData) {
-            Image(uiImage: image)
+//        if let image = UIImage(data: viewModel.productImageData) {
+        Image(uiImage: viewModel.productImage)
                 .resizable()
                 .scaledToFill()
                 .aspectRatio(contentMode: .fit)
@@ -29,15 +29,15 @@ struct ProductDetailView: View {
                     )
                     .cornerRadius(20)
                 }
-        } else {
-            Image(systemName: "image.fill")
-                .resizable()
-                .scaledToFill()
-                .aspectRatio(contentMode: .fit)
-                .clipped()
-                .frame(maxHeight: 300, alignment: .top)
-                .foregroundColor(.gray)
-        }
+//        } else {
+//            Image(systemName: "image.fill")
+//                .resizable()
+//                .scaledToFill()
+//                .aspectRatio(contentMode: .fit)
+//                .clipped()
+//                .frame(maxHeight: 300, alignment: .top)
+//                .foregroundColor(.gray)
+//        }
         VStack {
             ScrollView {
                 VStack(alignment: .center) {

@@ -11,7 +11,6 @@ import SwiftUI
 struct LandingPageView: View {
 //    @EnvironmentObject var alertViewModel: AlertViewModel
     var body: some View {
-        NavigationStack {
             ZStack {
                 // Background gradient
                 Color.white
@@ -77,7 +76,6 @@ struct LandingPageView: View {
                 }
                 .padding()
             }
-        }
     }
 }
 

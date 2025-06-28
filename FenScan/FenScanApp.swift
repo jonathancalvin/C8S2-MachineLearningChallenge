@@ -13,13 +13,15 @@ struct FenScanApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if currentPage < 2 {
-                    OnboardingViewWithIndicator(currentPage: $currentPage)
-                        .environmentObject(alertViewModel)
-                } else {
-                    ScanView()
-                        .environmentObject(alertViewModel)
+            NavigationStack {
+                Group {
+                    if currentPage < 2 {
+                        OnboardingViewWithIndicator(currentPage: $currentPage)
+                            .environmentObject(alertViewModel)
+                    } else {
+                        ScanView()
+                            .environmentObject(alertViewModel)
+                    }
                 }
             }
             .ignoresSafeArea()

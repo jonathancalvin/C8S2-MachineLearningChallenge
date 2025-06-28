@@ -12,16 +12,8 @@ import Combine
 
 class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var recognizedText: String = ""
-    @Published var capturedImage: UIImage? = nil {
-        didSet {
-            print("capturedImage")
-        }
-    }
-    @Published var translatedText: String = "" {
-        didSet {
-            print("Teks hasil terjemahan di-set")
-        }
-    }
+    @Published var capturedImage: UIImage? = nil
+    @Published var translatedText: String = ""
     @Published var isReadyToNavigate: Bool = false
 
     private var cancellables = Set<AnyCancellable>()
@@ -108,53 +100,29 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         latestBuffer = sampleBuffer
     }
 
-    func captureImage() {
-        guard let buffer = latestBuffer, let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        let context = CIContext()
-
-        let orientedCIImage = ciImage.oriented(.right)
-
-        guard let cgImage = context.createCGImage(orientedCIImage, from: orientedCIImage.extent) else { return }
-        let uiImage = UIImage(cgImage: cgImage)
-        if let imageData = uiImage.jpegData(compressionQuality: 1) {
-            self.latestImageData = imageData
-        }
-    }
 
     func performTextRecognition(boundingBox: CGRect, previewSize: CGSize) {
         guard let buffer = latestBuffer,
               let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
         
         // 1. Ambil citra kamera dengan orientasi yang sesuai
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right) // ← sesuaikan orientasi jika perlu (lihat catatan di bawah)
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right)
 
-        //TO DO: Fix Cropping
         let cameraImageSize = ciImage.extent.size
-//        let previewSize = imageSize // ← misalnya: previewSize = geo.size dari GeometryReader
 
         // 2. Hitung skala dari UI ke kamera
         let scaleX = cameraImageSize.width / previewSize.width
         let scaleY = cameraImageSize.height / previewSize.height
 
         // 3. Flip Y axis dari koordinat UI ke citra kamera (CIImage origin ada di kiri bawah)
-//        let flippedY = previewSize.height - frame.origin.y - frame.height
-//        print("flippedY: \(flippedY * scaleY)")
+        let flippedY = previewSize.height - boundingBox.origin.y - boundingBox.height
+
         let mappedBox = CGRect(
             x: boundingBox.origin.x * scaleX,
-            y: boundingBox.origin.y * scaleY,
+            y: flippedY * scaleY,
             width: boundingBox.width * scaleX,
             height: boundingBox.height * scaleY
         )
-//        print("Bounding Box size: \(boundingBox.width) \(boundingBox.height)")
-//        print("Preview size: \(previewSize.width) \(previewSize.height)")
-//        print("Image size: \(cameraImageSize.width) \(cameraImageSize.height)")
-//        print("=================================")
-//        print("frame min: \(boundingBox.minX * scaleX) \(boundingBox.minY * scaleY)")
-//        print("frame origin: \(boundingBox.origin.x * scaleX) \(boundingBox.origin.y * scaleY)")
-//        print("frame mid: \(boundingBox.midX * scaleX) \(boundingBox.midY * scaleY)")
-//        print("frame max: \(boundingBox.maxX * scaleX) \(boundingBox.maxY * scaleY)")
-//        print("frame size: \(boundingBox.width * scaleX) \(boundingBox.height * scaleY)")
 
         // 4. Crop hanya pada boundary box
         let cropped = ciImage.cropped(to: mappedBox)

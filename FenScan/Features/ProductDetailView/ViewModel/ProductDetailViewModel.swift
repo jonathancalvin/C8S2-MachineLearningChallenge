@@ -10,7 +10,7 @@ import SwiftUI
 import Translation
 
 class ProductDetailViewModel: ObservableObject {
-    @Published var productImageData: Data
+    @Published var productImage: UIImage
     @Published var haramIngredient: [String] = []
     @Published var translatedText: String = "" {
         didSet {
@@ -62,8 +62,8 @@ class ProductDetailViewModel: ObservableObject {
         }
     }
     
-    init(productImageData: Data) {
-        self.productImageData = productImageData
+    init(productImage: UIImage) {
+        self.productImage = productImage
     }
     private func getIngredientSection(_ text: String) -> (Bool, [String]) {
         guard let cleanData = MLManager.shared.preProcessData(

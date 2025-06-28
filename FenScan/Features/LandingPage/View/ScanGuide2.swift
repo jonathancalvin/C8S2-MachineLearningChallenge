@@ -13,7 +13,6 @@ struct ScanGuide2: View {
     @Binding var currentPage: Int
     var body: some View {
 
-        NavigationStack {
             VStack {
                 ZStack {
                     // Background gradient
@@ -46,7 +45,6 @@ struct ScanGuide2: View {
                     }
                     
                     VStack {
-                        
                         HStack(alignment: .center, spacing: 4) {
                             Text("Scan with")
                                 .font(.system(size: 28))
@@ -67,7 +65,7 @@ struct ScanGuide2: View {
                         }
                         .frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 40)
+                        .padding(.top, 50)
                         
                         InstructionView()
                         
@@ -84,18 +82,16 @@ struct ScanGuide2: View {
                                 .cornerRadius(16)
                                 .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 4)
                         }
-                        .padding(.bottom, 60)
-                        
+                        .padding(.bottom, 100)
                     }
                 }
             }
             .navigationDestination(isPresented: $isNavigating) {
                 ScanView()
-//                    .environmentObject(alertViewModel)
+                    .environmentObject(alertViewModel)
                   
             }
             
-        }
 
         
     }

@@ -20,18 +20,117 @@ class ViewModelWrapper: ObservableObject {
 struct ScanView: View {
     @EnvironmentObject var alertViewModel: AlertViewModel
     @StateObject private var viewModel = ScanViewModel()
-    @StateObject private var productDetailViewModel: ProductDetailViewModel = ProductDetailViewModel(productImageData: Data())
+    @StateObject private var productDetailViewModel: ProductDetailViewModel = ProductDetailViewModel(productImage: UIImage())
     @State var preventTranslationLoop: Bool = false
 
-    let boxWidth: CGFloat = 318
-    let boxHeight: CGFloat = 485
 
     @State var translationRequest: TranslationSession.Request = .init(sourceText: "")
     @State var translationConfiguration: TranslationSession.Configuration?
 
+    private func onScan(containerSize: CGSize, boxWidth: CGFloat, boxHeight: CGFloat) {
+        let origin = CGPoint(
+            x: ((containerSize.width - boxWidth) / 2) + 50,
+            y: ((containerSize.height - boxHeight) / 2) + 25
+        )
+        let frame = CGRect(origin: origin, size: CGSize(width: boxWidth - 100, height: boxHeight - 50))
+        viewModel.performTextRecognition(boundingBox: frame, previewSize: containerSize)
+        preventTranslationLoop = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            if let image = viewModel.capturedImage, !viewModel.recognizedText.isEmpty {
+                translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
+                if translationConfiguration == nil {
+                    translationConfiguration = TranslationSession.Configuration(
+                        source: Locale.Language(identifier: "zh-Hant"),
+                        target: Locale.Language(identifier: "en")
+                    )
+                }
+                productDetailViewModel.productImage = image
+                productDetailViewModel.alertViewModel = self.alertViewModel
+                translationConfiguration?.invalidate()
+            } else {
+                alertViewModel.show(title: "Scan Unsuccessful", message: "We couldn’t detect any ingredient info. Let’s try scanning again.")
+            }
+        }
+    }
+    struct CornerBoundingBox: View {
+        let boxWidth: CGFloat
+        let boxHeight: CGFloat
+        let cornerRadius: CGFloat
+        let cornerLength: CGFloat = 30
+        let lineWidth: CGFloat = 4
+        let color: Color = .white
+
+        var body: some View {
+            ZStack {
+                // Top-Left Corner
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: cornerRadius))
+                    path.addArc(center: CGPoint(x: cornerRadius, y: cornerRadius),
+                                radius: cornerRadius,
+                                startAngle: .degrees(180),
+                                endAngle: .degrees(270),
+                                clockwise: false)
+                    path.move(to: CGPoint(x: 0, y: cornerRadius))
+                    path.addLine(to: CGPoint(x: 0, y: cornerRadius + cornerLength))
+                    path.move(to: CGPoint(x: cornerRadius, y: 0))
+                    path.addLine(to: CGPoint(x: cornerRadius + cornerLength, y: 0))
+                }
+                .stroke(color, lineWidth: lineWidth)
+
+                // Top-Right Corner
+                Path { path in
+                    path.move(to: CGPoint(x: boxWidth - cornerRadius, y: 0))
+                    path.addArc(center: CGPoint(x: boxWidth - cornerRadius, y: cornerRadius),
+                                radius: cornerRadius,
+                                startAngle: .degrees(270),
+                                endAngle: .degrees(0),
+                                clockwise: false)
+                    path.move(to: CGPoint(x: boxWidth, y: cornerRadius))
+                    path.addLine(to: CGPoint(x: boxWidth, y: cornerRadius + cornerLength))
+                    path.move(to: CGPoint(x: boxWidth - cornerRadius, y: 0))
+                    path.addLine(to: CGPoint(x: boxWidth - cornerRadius - cornerLength, y: 0))
+                }
+                .stroke(color, lineWidth: lineWidth)
+
+                // Bottom-Left Corner
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: boxHeight - cornerRadius))
+                    path.addArc(center: CGPoint(x: cornerRadius, y: boxHeight - cornerRadius),
+                                radius: cornerRadius,
+                                startAngle: .degrees(180),
+                                endAngle: .degrees(90),
+                                clockwise: true)
+                    path.move(to: CGPoint(x: 0, y: boxHeight - cornerRadius))
+                    path.addLine(to: CGPoint(x: 0, y: boxHeight - cornerRadius - cornerLength))
+                    path.move(to: CGPoint(x: cornerRadius, y: boxHeight))
+                    path.addLine(to: CGPoint(x: cornerRadius + cornerLength, y: boxHeight))
+                }
+                .stroke(color, lineWidth: lineWidth)
+
+                // Bottom-Right Corner
+                Path { path in
+//                    path.move(to: CGPoint(x: boxWidth - cornerRadius, y: boxHeight))
+                    path.addArc(center: CGPoint(x: boxWidth - cornerRadius, y: boxHeight - cornerRadius),
+                                radius: cornerRadius,
+                                startAngle: .degrees(0),
+                                endAngle: .degrees(90),
+                                clockwise: false)
+                    path.move(to: CGPoint(x: boxWidth, y: boxHeight - cornerRadius))
+                    path.addLine(to: CGPoint(x: boxWidth, y: boxHeight - cornerRadius - cornerLength))
+                    path.move(to: CGPoint(x: boxWidth - cornerRadius, y: boxHeight))
+                    path.addLine(to: CGPoint(x: boxWidth - cornerRadius - cornerLength, y: boxHeight))
+                }
+                .stroke(color, lineWidth: lineWidth)
+            }
+            .frame(width: boxWidth, height: boxHeight)
+        }
+    }
     var body: some View {
-        NavigationStack {
             GeometryReader { geo in
+                let containerSize = geo.size
+                let boxWidth: CGFloat = containerSize.width * 0.8
+                let boxHeight: CGFloat = containerSize.height * 0.5
+                let radius: CGFloat = 20
                 ZStack {
                     // Camera feed
                     CameraView(viewModel: viewModel)
@@ -51,42 +150,15 @@ struct ScanView: View {
                                         .blendMode(.destinationOut)
                                 )
                         }
-                        .compositingGroup()
-                        .ignoresSafeArea()
 
-                    Image("boundaryBox")
-                        .resizable()
-                        .frame(width: 322, height: 490)
-                        .padding(.bottom, 20)
+                    CornerBoundingBox(boxWidth: boxWidth, boxHeight: boxHeight, cornerRadius: radius)
+                        .frame(width: boxWidth, height: boxHeight)
 
                     // Tombol Scan di bagian bawah
                     VStack {
                         Spacer()
                         Button(action: {
-                            let origin = CGPoint(
-                                x: (geo.size.width - boxWidth) / 2,
-                                y: (geo.size.height - boxHeight) / 2
-                            )
-                            let frame = CGRect(origin: origin, size: CGSize(width: boxWidth, height: boxHeight))
-                            viewModel.performTextRecognition(boundingBox: frame, previewSize: geo.size)
-                            preventTranslationLoop = false
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                                if !viewModel.recognizedText.isEmpty {
-                                    viewModel.captureImage()
-                                    translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
-                                    if translationConfiguration == nil {
-                                        translationConfiguration = TranslationSession.Configuration(
-                                            source: Locale.Language(identifier: "zh-Hant"),
-                                            target: Locale.Language(identifier: "en")
-                                        )
-                                    }
-                                    productDetailViewModel.productImageData = viewModel.latestImageData ?? Data()
-                                    productDetailViewModel.alertViewModel = self.alertViewModel
-                                    translationConfiguration?.invalidate()
-                                } else {
-                                    alertViewModel.show(title: "Scan Unsuccessful", message: "We couldn’t detect any ingredient info. Let’s try scanning again.")
-                                }
-                            }
+                            onScan(containerSize: containerSize, boxWidth: boxWidth, boxHeight: boxHeight)
                         }) {
                             Image("CameraShutter")
                                 .resizable()
@@ -107,7 +179,7 @@ struct ScanView: View {
                         }
                     }
                 }
-            }
+                .ignoresSafeArea()
             .alert(alertViewModel.title, isPresented: $alertViewModel.showAlert) {
                 Button("Retake", role: .cancel) { }
             } message: {
