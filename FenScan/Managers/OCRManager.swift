@@ -8,15 +8,14 @@ import UIKit
 import Vision
 import SwiftUI
 
-final class OCRManager : OCRManagerProtocol {
-    func imageToTextHandler(image: UIImage?, completion: @escaping (String) -> Void) {
-        // Get the CGImage on which to perform requests.
-        guard let cgImage = image?.cgImage else { return }
+final class OCRManager: OCRManagerProtocol {
+    func imageToTextHandler(image: CIImage?, completion: @escaping (String) -> Void) {
 
+        // Get the CGImage on which to perform requests.
+        guard let ciImage = image else { return }
 
         // Create a new image-request handler.
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-
+        let requestHandler = VNImageRequestHandler(ciImage: ciImage, options: [:])
 
         // Create a new request to recognize text.
         let request = makeTextRecognitionRequest { recognizedStrings in
@@ -54,8 +53,8 @@ private extension OCRManager {
         request.recognitionLanguages = ["zh-Hans", "zh-Hant", "en"]
         return request
     }
-    
-    func processResults(_ texts: [String]) -> String{
+
+    func processResults(_ texts: [String]) -> String {
         return texts.joined(separator: ", ")
     }
 }

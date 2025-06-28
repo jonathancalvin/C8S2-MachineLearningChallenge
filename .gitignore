@@ -114,3 +114,6 @@ xcuserdata
 
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,swiftpm,swiftpackagemanager,xcode,xcodeinjection
+.DS_Store
+FenScan.xcodeproj/project.pbxproj
+FenScan.xcodeproj/project.pbxproj
