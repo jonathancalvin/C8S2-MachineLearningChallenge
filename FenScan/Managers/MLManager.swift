@@ -186,7 +186,6 @@ final class MLManager {
         }
 
         let uniqueList = uniqueIngredients(from: tokens)
-        print(uniqueList)
         return uniqueList
     }
 }

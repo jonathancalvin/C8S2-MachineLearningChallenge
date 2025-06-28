@@ -29,10 +29,10 @@ struct ScanView: View {
 
     private func onScan(containerSize: CGSize, boxWidth: CGFloat, boxHeight: CGFloat) {
         let origin = CGPoint(
-            x: ((containerSize.width - boxWidth) / 2) + 50,
+            x: ((containerSize.width - boxWidth) / 2) + 62.5,
             y: ((containerSize.height - boxHeight) / 2) + 25
         )
-        let frame = CGRect(origin: origin, size: CGSize(width: boxWidth - 100, height: boxHeight - 50))
+        let frame = CGRect(origin: origin, size: CGSize(width: boxWidth - 125, height: boxHeight - 50))
         viewModel.performTextRecognition(boundingBox: frame, previewSize: containerSize)
         preventTranslationLoop = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
