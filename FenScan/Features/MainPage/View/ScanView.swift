@@ -161,6 +161,5 @@ struct ScanView: View {
 //            }
             .navigationBarBackButtonHidden(true)
         }
-        
     }
 }
