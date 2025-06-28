@@ -9,8 +9,7 @@ import SwiftUI
 
 struct ScanGuide2: View {
     @EnvironmentObject var alertViewModel: AlertViewModel
-    @State var isNavigating = false
-    @Binding var currentPage: Int
+    @Binding var currentPage: AppPageEnum
     var body: some View {
 
             VStack {
@@ -70,8 +69,7 @@ struct ScanGuide2: View {
                         InstructionView()
                         
                         Button {
-                            isNavigating = true
-                            currentPage = 2
+                            currentPage = AppPageEnum.scan
                         } label: {
                             Text("Get Started")
                                 .fontWeight(.bold)
@@ -86,14 +84,5 @@ struct ScanGuide2: View {
                     }
                 }
             }
-            .navigationDestination(isPresented: $isNavigating) {
-                ScanView()
-                    .environmentObject(alertViewModel)
-                  
-            }
-            
-
-        
     }
-    
 }

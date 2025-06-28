@@ -9,16 +9,18 @@ import SwiftUI
 @main
 struct FenScanApp: App {
     @StateObject var alertViewModel = AlertViewModel()
-    @State private var currentPage = 0
+    @State private var currentPage = AppPageEnum.landing
 
     var body: some Scene {
         WindowGroup {
             NavigationStack {
                 Group {
-                    if currentPage < 2 {
+                    switch currentPage {
+                    case .landing, .guide:
                         OnboardingViewWithIndicator(currentPage: $currentPage)
                             .environmentObject(alertViewModel)
-                    } else {
+
+                    case .scan:
                         ScanView()
                             .environmentObject(alertViewModel)
                     }
