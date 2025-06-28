@@ -71,22 +71,21 @@ struct ScanView: View {
                             viewModel.performTextRecognition(boundingBox: frame, previewSize: geo.size)
                             preventTranslationLoop = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                                print("rrrrrrrrrrrrr:\(viewModel.recognizedText)")
-//                                if !viewModel.recognizedText.isEmpty {
-//                                    viewModel.captureImage()
-//                                    translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
-//                                    if translationConfiguration == nil {
-//                                        translationConfiguration = TranslationSession.Configuration(
-//                                            source: Locale.Language(identifier: "zh-Hant"),
-//                                            target: Locale.Language(identifier: "en")
-//                                        )
-//                                    }
-//                                    productDetailViewModel.productImageData = viewModel.latestImageData ?? Data()
-//                                    productDetailViewModel.alertViewModel = self.alertViewModel
-//                                    translationConfiguration?.invalidate()
-//                                } else {
-//                                    alertViewModel.show(title: "Scan Unsuccessful", message: "We couldn’t detect any ingredient info. Let’s try scanning again.")
-//                                }
+                                if !viewModel.recognizedText.isEmpty {
+                                    viewModel.captureImage()
+                                    translationRequest = TranslationSession.Request(sourceText: viewModel.recognizedText)
+                                    if translationConfiguration == nil {
+                                        translationConfiguration = TranslationSession.Configuration(
+                                            source: Locale.Language(identifier: "zh-Hant"),
+                                            target: Locale.Language(identifier: "en")
+                                        )
+                                    }
+                                    productDetailViewModel.productImageData = viewModel.latestImageData ?? Data()
+                                    productDetailViewModel.alertViewModel = self.alertViewModel
+                                    translationConfiguration?.invalidate()
+                                } else {
+                                    alertViewModel.show(title: "Scan Unsuccessful", message: "We couldn’t detect any ingredient info. Let’s try scanning again.")
+                                }
                             }
                         }) {
                             Image("CameraShutter")
@@ -99,7 +98,6 @@ struct ScanView: View {
                             Task { @MainActor in
                                 do {
                                     for try await response in session.translate(batch: [translationRequest]) {
-                                        print("Translation: \(response.targetText)")
                                         productDetailViewModel.translatedText = response.targetText
                                     }
                                 } catch {
@@ -118,47 +116,6 @@ struct ScanView: View {
             .navigationDestination(isPresented: $productDetailViewModel.isNavigating) {
                 ProductDetailView(viewModel: productDetailViewModel)
             }
-//            .onAppear {
-//                if viewModel.capturedImage != nil {
-//                    print("ada foto")
-//                } else {
-//                    print("tidak ada foto")
-//                }
-//                
-//                if viewModel.translatedText.isEmpty {
-//                    print("tidak ada translated text")
-//                } else {
-//                    print("translated ada, ", viewModel.translatedText)
-//                }
-//                
-//                if viewModel.recognizedText.isEmpty {
-//                    print("tidak ada recognized text")
-//                } else {
-//                    print("recognized text ada, ", viewModel.recognizedText)
-//                }
-//                viewModel.capturedImage = nil
-//                viewModel.translatedText = ""
-//                viewModel.recognizedText = ""
-//                print("Setelah =============================")
-//                if viewModel.capturedImage != nil {
-//                    print("ada foto")
-//                } else {
-//                    print("tidak ada foto")
-//                }
-//                
-//                if viewModel.translatedText.isEmpty {
-//                    print("tidak ada translated text")
-//                } else {
-//                    print("translated ada, ", viewModel.translatedText)
-//                }
-//                
-//                if viewModel.recognizedText.isEmpty {
-//                    print("tidak ada recognized text")
-//                } else {
-//                    print("recognized text ada, ", viewModel.recognizedText)
-//                }
-//
-//            }
             .navigationBarBackButtonHidden(true)
         }
         

@@ -117,7 +117,6 @@ final class MLManager {
             result.append(char)
         }
         result = result.trimmingCharacters(in: .whitespacesAndNewlines)
-        print("ingredient section: \(result)")
         return (term, result)
     }
 

@@ -45,8 +45,7 @@ struct InstructionView: View {
                                 
                                 // Instruction 2
                                 InstructionRow(
-                                    text: "Make sure to scan at the back of package and fit the text inside the scan area",
-                                    
+                                    text: "Make sure to scan at the back of package and fit the text inside the scan area"
                                 )
                                 
                                 // Instruction 3

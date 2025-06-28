@@ -119,7 +119,6 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         let uiImage = UIImage(cgImage: cgImage)
         if let imageData = uiImage.jpegData(compressionQuality: 1) {
             self.latestImageData = imageData
-            print("captured: \(imageData.count)")
         }
     }
 
@@ -147,15 +146,15 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
             width: boundingBox.width * scaleX,
             height: boundingBox.height * scaleY
         )
-        print("Bounding Box size: \(boundingBox.width) \(boundingBox.height)")
-        print("Preview size: \(previewSize.width) \(previewSize.height)")
-        print("Image size: \(cameraImageSize.width) \(cameraImageSize.height)")
-        print("=================================")
-        print("frame min: \(boundingBox.minX * scaleX) \(boundingBox.minY * scaleY)")
-        print("frame origin: \(boundingBox.origin.x * scaleX) \(boundingBox.origin.y * scaleY)")
-        print("frame mid: \(boundingBox.midX * scaleX) \(boundingBox.midY * scaleY)")
-        print("frame max: \(boundingBox.maxX * scaleX) \(boundingBox.maxY * scaleY)")
-        print("frame size: \(boundingBox.width * scaleX) \(boundingBox.height * scaleY)")
+//        print("Bounding Box size: \(boundingBox.width) \(boundingBox.height)")
+//        print("Preview size: \(previewSize.width) \(previewSize.height)")
+//        print("Image size: \(cameraImageSize.width) \(cameraImageSize.height)")
+//        print("=================================")
+//        print("frame min: \(boundingBox.minX * scaleX) \(boundingBox.minY * scaleY)")
+//        print("frame origin: \(boundingBox.origin.x * scaleX) \(boundingBox.origin.y * scaleY)")
+//        print("frame mid: \(boundingBox.midX * scaleX) \(boundingBox.midY * scaleY)")
+//        print("frame max: \(boundingBox.maxX * scaleX) \(boundingBox.maxY * scaleY)")
+//        print("frame size: \(boundingBox.width * scaleX) \(boundingBox.height * scaleY)")
 
         // 4. Crop hanya pada boundary box
         let cropped = ciImage.cropped(to: mappedBox)
@@ -163,22 +162,13 @@ class ScanViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleB
         if let uiImage = cropped.toUIImage() {
             capturedImage = uiImage
         }
-        //PLS BNER
-        DispatchQueue.main.async {
-            self.recognizedText = "aaa"
-        }
         
-        // 5. OCR hanya di area dalam bounding box
-//        let OCR = OCRManager()
-//        OCR.imageToTextHandler(image: cropped) { [weak self] text in
-//            if text.isEmpty {
-//                print("OCR failed")
-//            } else {
-////                print("recognized: \(text)")
-//            }
-//            DispatchQueue.main.async {
-//                self?.recognizedText = text
-//            }
-//        }
+//        5. OCR hanya di area dalam bounding box
+        let OCR = OCRManager()
+        OCR.imageToTextHandler(image: cropped) { [weak self] text in
+            DispatchQueue.main.async {
+                self?.recognizedText = text
+            }
+        }
     }
 }
